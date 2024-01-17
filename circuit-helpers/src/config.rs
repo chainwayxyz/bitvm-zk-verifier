@@ -1,0 +1,1 @@
+pub const NUM_BLOCKS: usize = 2;

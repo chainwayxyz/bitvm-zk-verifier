@@ -1,0 +1,7 @@
+{
+  "rust-analyzer.linkedProjects": [
+    "./risc0-circuit/guest/Cargo.toml",
+    "./circuit-helpers/Cargo.toml",
+    "./Cargo.toml"
+  ]
+}

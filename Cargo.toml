@@ -1,0 +1,21 @@
+[package]
+name = "end2endbitvm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+circuit-helpers = {path = "circuit-helpers"}
+#bitcoin = { version = "0.31.0", features = ["rand"] }
+#bitcoincore-rpc = "0.18.0"
+hex = "0.4.3"
+#sha2 = "=0.10.6"
+risc0-zkvm = { path="../risc0-main/risc0/zkvm", features = ["prove"]}
+env_logger = "0.10"
+serde = "1.0"
+serde_json = "1.0.108"
+reqwest = "0.11.23"
+bitcoin-circuit = { path = "risc0-circuit" }
+risc0-seal-to-json = {path="../risc0-main/compact_proof/seal_to_json"}
+
