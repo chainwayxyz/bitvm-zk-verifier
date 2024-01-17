@@ -1,1 +1,1 @@
-pub const NUM_BLOCKS: usize = 2;
+pub const NUM_BLOCKS: u32 = 10;

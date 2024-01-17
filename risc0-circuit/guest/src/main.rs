@@ -2,7 +2,6 @@
 #![no_std]
 
 use circuit_helpers::bitcoin::{validate_threshold_and_add_work, BlockHeader};
-use circuit_helpers::config::NUM_BLOCKS;
 use circuit_helpers::hashes::calculate_double_sha256;
 use crypto_bigint::Encoding;
 use crypto_bigint::U256;
@@ -15,8 +14,9 @@ pub fn main() {
     let mut previous_block_hash = initial_block_hash;
     previous_block_hash.reverse();
     let mut work = U256::ZERO;
+    let num_blocks:u32 = env::read();
 
-    for _ in 0..NUM_BLOCKS {
+    for _ in 0..num_blocks {
         let block_header: BlockHeader = env::read();
         assert_eq!(block_header.previous_block_hash, previous_block_hash);
         let data = &block_header.as_bytes();

@@ -32,14 +32,17 @@ fn get_block_header(block_height: usize) -> BlockHeader {
 fn main() {
     env_logger::init();
     let mut env = ExecutorEnv::builder();
-    let end_block_height = 100001;
-    let prev_block_hash: [u8; 32] = hex::decode(get_block_hash(end_block_height - NUM_BLOCKS - 2))
+    let end_block_height = 100000;
+    let prev_block_hash: [u8; 32] = hex::decode(get_block_hash(end_block_height - NUM_BLOCKS as usize - 1))
         .unwrap()
         .try_into()
         .unwrap();
     env.write(&prev_block_hash).unwrap();
+    let num_blocks: u32 = NUM_BLOCKS;
+    env.write(&num_blocks).unwrap();
     println!("prev_block_hash: {:?}", prev_block_hash);
-    for i in end_block_height - NUM_BLOCKS..end_block_height {
+    let start_block: usize = end_block_height - NUM_BLOCKS as usize;
+    for i in start_block..end_block_height {
         let block_header = get_block_header(i);
         println!("block_header: {:?}", block_header);
         env.write(&block_header).unwrap();
@@ -81,5 +84,18 @@ fn main() {
     let seal_json = File::create(&seal_path).unwrap();
     let mut seal_reader = Cursor::new(&seal_bytes);
     risc0_seal_to_json::to_json(&mut seal_reader, &seal_json).unwrap();
+
+    let status = Command::new("docker")
+        .arg("run")
+        .arg("--rm")
+        .arg("-v")
+        .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
+        .arg("risc0-groth16-prover")
+        .status()
+        .unwrap();
+    if !status.success() {
+        panic!("docker returned failure exit code: {:?}", status.code());
+    }
+
 
 }
