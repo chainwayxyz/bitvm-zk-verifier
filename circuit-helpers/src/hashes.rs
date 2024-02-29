@@ -10,6 +10,13 @@ pub fn calculate_double_sha256(input: &[u8]) -> Data {
     hasher.finalize().try_into().unwrap()
 }
 
+pub fn calculate_single_sha256(input: &[u8]) -> Data {
+    let mut hasher = Sha256::new();
+    hasher.update(input);
+    hasher.finalize().try_into().unwrap()
+}
+
+
 pub fn sha256_64bytes(a: Data, b: Data) -> Data {
     let mut c = [0_u8; 2 * 32];
     c[..32].copy_from_slice(&a);
