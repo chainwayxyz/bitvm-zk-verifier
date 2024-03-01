@@ -3,3 +3,4 @@ Cargo.lock
 circuits/operator/guest/Cargo.lock
 **target/
 .env
+/work_dir/input.json
