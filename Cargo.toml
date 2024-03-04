@@ -21,4 +21,6 @@ risc0-groth16 = {path="../risc0/risc0/groth16", features=["prove"]}
 crypto-bigint = {version="=0.5.2", default-features = false}
 tracing = "0.1.40"
 sha2 = {version="=0.10.6", default-features = false}
+hello-world = {path="./examples/hello-world"}
+num-bigint = "0.4.4"
 
