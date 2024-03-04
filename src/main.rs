@@ -5,7 +5,7 @@ use circuit_helpers::bitcoin::BlockHeader;
 use circuit_helpers::double_sha256_hash;
 use circuit_helpers::sha256_hash;
 use crypto_bigint::{Encoding, U256};
-use end2endbitvm::data::{BLOCK_HEADERS, ALLOWED_IDS_ROOT};
+use end2endbitvm::data::{ALLOWED_IDS_ROOT, BLOCK_HEADERS};
 use hex::FromHex;
 use risc0_groth16::verifier::prepared_verifying_key;
 use risc0_groth16::PublicInputsJson;
@@ -21,7 +21,6 @@ use std::hash;
 use std::io::{Read, Write};
 use std::{fs::File, io::Cursor, path::Path};
 
-
 fn give_image_id(image_id: impl Into<Digest>) -> risc0_zkvm::sha::Digest {
     image_id.into()
 }
@@ -35,6 +34,18 @@ pub fn split_digest_custom(d: Digest) -> (String, String) {
         u128::from_be_bytes(b.try_into().unwrap()).to_string(),
     )
 }
+
+pub fn c_print(variable_name: &str, bytes: &[u8]) {
+    print!("unsigned char {}[] = {{", variable_name);
+    for (i, byte) in bytes.iter().enumerate() {
+        print!("{}", byte);
+        if i < bytes.len() - 1 {
+            print!(", ");
+        }
+    }
+    println!("}};");
+}
+
 fn main() {
     env_logger::init();
     let mut env = ExecutorEnv::builder();
@@ -50,7 +61,7 @@ fn main() {
     }
     println!("public output 2: {:?}", hex::encode(last_block_hash));
     println!("public output 3: {:?}", hex::encode(work.to_be_bytes()));
-    
+
     let env = env.build().unwrap();
 
     tracing::info!("execute");
@@ -63,6 +74,9 @@ fn main() {
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
     let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let (_, block_hash, pow, period): (u32, [u8; 32], [u8; 32], u32) =
+        receipt.journal.decode().unwrap();
+
     let claim = receipt.get_claim().unwrap();
     println!("claim : {:?}", claim);
     let composite_receipt = receipt.inner.composite().unwrap();
@@ -98,9 +112,32 @@ fn main() {
         0u32.to_le_bytes(),
         4u16.to_le_bytes()
     );
+    println!("expected Claim digest: {:?}", claim.digest().as_bytes());
+    println!(
+        "expected output digest: {:?}",
+        claim.output.digest().as_bytes()
+    );
+    c_print(
+        "RECEIPT_CLAIM_TAG",
+        &sha256_hash!("risc0.ReceiptClaim".as_bytes()),
+    );
+    c_print("CLAIM_INPUT", &claim.input.as_bytes());
+    c_print("CLAIM_PRE", &claim.pre.digest().as_bytes());
+    c_print("CLAIM_POST", &claim.post.digest().as_bytes());
+    c_print("OUTPUT_TAG", &sha256_hash!("risc0.Output".as_bytes()));
+    c_print("JOURNAL", &journal);
+    c_print("ZEROS", &[0u8; 32]);
+    c_print("TWO_U16", &2u16.to_le_bytes());
+    c_print("FOUR_U16", &4u16.to_le_bytes());
+    c_print("ZERO_U32", &0u32.to_le_bytes());
     let (a0, a1) = split_digest_custom(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap()); // This part is constant
+    println!("const char* public_input_1 = {:?};", a0);
+    println!("const char* public_input_2 = {:?};", a1);
     let (c0, c1) = split_digest_custom(claim_digest.into());
 
+    c_print("BLOCK_HASH", &block_hash);
+    c_print("POW", &pow);
+    println!("const unsigned char PERIOD = {};", period);
 
     // let public_inputs = vec![a0, a1, c0, c1];
     // // write public inputs to work_dir/public_inputs.json
