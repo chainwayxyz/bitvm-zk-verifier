@@ -1,4 +1,3 @@
-use bitcoin_pow::calculate_pow;
 use hex::FromHex;
 use num_bigint::BigUint;
 use risc0_groth16::verifier::prepared_verifying_key;
@@ -14,7 +13,8 @@ use std::fs;
 use std::str::FromStr;
 use std::{fs::File, io::Cursor, path::Path};
 
-// use hello_world::multiply;
+use hello_world::multiply;
+// use bitcoin_pow::calculate_pow;
 
 /// Merkle root of the RECURSION_CONTROL_IDS
 pub const ALLOWED_IDS_ROOT: &str =
@@ -62,8 +62,8 @@ pub struct PublicProofJson {
     pub curve: Option<String>,
 }
 fn main() {
-    // let (receipt, _) = multiply(101, 97);
-    let (receipt, _) = calculate_pow();
+    let (receipt, _) = multiply(101, 97);
+    // let (receipt, _) = calculate_pow();
     let claim = receipt.get_claim().unwrap();
 
     let opts = ProverOpts::default();
