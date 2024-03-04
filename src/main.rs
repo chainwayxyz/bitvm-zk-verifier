@@ -1,32 +1,24 @@
-use bitcoin_circuit::{GUEST_ELF, GUEST_ID};
-use circuit_helpers::bitcoin::validate_threshold_and_add_work;
-
-use circuit_helpers::bitcoin::BlockHeader;
-use circuit_helpers::double_sha256_hash;
-use circuit_helpers::sha256_hash;
-use crypto_bigint::{Encoding, U256};
-use end2endbitvm::data::{ALLOWED_IDS_ROOT, BLOCK_HEADERS};
-use hello_world::multiply;
+use bitcoin_pow::calculate_pow;
 use hex::FromHex;
+use num_bigint::BigUint;
 use risc0_groth16::verifier::prepared_verifying_key;
 use risc0_groth16::PublicInputsJson;
-use risc0_groth16::{split_digest, to_json, ProofJson, Verifier};
+use risc0_groth16::{to_json, ProofJson, Verifier};
 use risc0_zkvm::sha::{Digest, Digestible};
-use risc0_zkvm::{
-    get_prover_server, recursion::identity_p254, ExecutorEnv, ExecutorImpl, ProverOpts,
-    VerifierContext,
-};
+use risc0_zkvm::{get_prover_server, recursion::identity_p254, ProverOpts};
 use serde::Deserialize;
 use serde_json::from_str;
 use sha2::Digest as OtherDigest;
 use sha2::Sha256;
 use std::fs;
-use std::hash;
-use std::io::{Read, Write};
 use std::str::FromStr;
 use std::{fs::File, io::Cursor, path::Path};
-use num_bigint::BigUint;
 
+use hello_world::multiply;
+
+/// Merkle root of the RECURSION_CONTROL_IDS
+pub const ALLOWED_IDS_ROOT: &str =
+    "6df708447638d36828ebf4545980ff39315562181c926d3a9e2697405f3acf15";
 
 pub fn split_digest_custom(d: Digest) -> (u128, u128) {
     let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
@@ -49,6 +41,17 @@ pub fn c_print(variable_name: &str, bytes: &[u8]) {
     println!("}};");
 }
 
+macro_rules! sha256_hash {
+    ($($data:expr),+) => {{
+        let mut hasher = Sha256::new();
+        $(
+            hasher.update($data);
+        )+
+        let result: [u8; 32] = hasher.finalize().try_into().expect("SHA256 should produce a 32-byte output");
+        result
+    }};
+}
+
 /// Groth16 Proof encoded as JSON.
 #[derive(Deserialize, Debug)]
 pub struct PublicProofJson {
@@ -59,7 +62,8 @@ pub struct PublicProofJson {
     pub curve: Option<String>,
 }
 fn main() {
-    let (receipt, _) = multiply(101, 97);
+    // let (receipt, _) = multiply(101, 97);
+    let (receipt, _) = calculate_pow();
     let claim = receipt.get_claim().unwrap();
 
     let opts = ProverOpts::default();
@@ -137,8 +141,12 @@ fn main() {
         println!("run:\nsudo docker run --rm -v /home/ekrem/bridge/risc0tobitvm/risc0tobitvm/work_dir:/mnt risc0-groth16-prover");
     }
 
-    let proof: PublicProofJson = from_str(&fs::read_to_string("./work_dir/proof.json").unwrap()).unwrap();
-    c_print("PROOF_PI_A0", &BigUint::from_str(&proof.pi_a[0]).unwrap().to_bytes_be());
+    let proof: PublicProofJson =
+        from_str(&fs::read_to_string("./work_dir/proof.json").unwrap()).unwrap();
+    c_print(
+        "PROOF_PI_A0",
+        &BigUint::from_str(&proof.pi_a[0]).unwrap().to_bytes_be(),
+    );
 }
 
 // fn main2() {
