@@ -10,18 +10,6 @@ sudo docker run --rm -v /home/ekrem/bridge/risc0tobitvm/risc0tobitvm/work_dir:/m
 
 ### Groth16 Verifier
 
-edit `groth16-verifier/last_two_constants.h`
-
-generate proof data
-
-```sh
-python3 generate_proof_bytes.py work_dir/proof.json
-```
-
-works for hardcoded
-
-### Groth16 Verifier
-
 ```sh
 git clone https://github.com/herumi/mcl
 cd mcl

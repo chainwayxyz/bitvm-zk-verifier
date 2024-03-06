@@ -1,7 +1,7 @@
 use hex::FromHex;
 use num_bigint::BigUint;
 use risc0_groth16::verifier::prepared_verifying_key;
-use risc0_groth16::PublicInputsJson;
+use risc0_groth16::{PublicInputsJson, Seal};
 use risc0_groth16::{to_json, ProofJson, Verifier};
 use risc0_zkvm::sha::{Digest, Digestible};
 use risc0_zkvm::{get_prover_server, recursion::identity_p254, ProverOpts};
@@ -9,7 +9,7 @@ use serde::Deserialize;
 use serde_json::from_str;
 use sha2::Digest as OtherDigest;
 use sha2::Sha256;
-use std::fs;
+use std::fs::{write, read_to_string};
 use std::str::FromStr;
 use std::{fs::File, io::Cursor, path::Path};
 
@@ -45,6 +45,10 @@ pub fn c_print2(variable_name: &str, bytes: &[u8]) -> String {
     format!("const unsigned char {variable_name}[] = {{{b}}};", b = bytes.iter().map(|s| s.to_string()).collect::<Vec<String>>().join(", "))
 }
 
+pub fn bytes_to_str(bytes: &[u8]) -> String {
+    bytes.iter().map(|s| s.to_string()).collect::<Vec<String>>().join(", ")
+}
+
 macro_rules! sha256_hash {
     ($($data:expr),+) => {{
         let mut hasher = Sha256::new();
@@ -66,6 +70,8 @@ pub struct PublicProofJson {
     pub curve: Option<String>,
 }
 fn main() {
+    let mut template = read_to_string("groth16-verifier/constants_template.h").unwrap();
+    
     let (receipt, _) = multiply(101, 97);
     // let (receipt, _) = calculate_pow();
     let claim = receipt.get_claim().unwrap();
@@ -81,26 +87,21 @@ fn main() {
     let seal_json = File::create(Path::new("./work_dir").join("input.json")).unwrap();
     let mut seal_reader = Cursor::new(&seal_bytes);
     to_json(&mut seal_reader, &seal_json).unwrap();
-    c_print(
-        "RECEIPT_CLAIM_TAG",
-        &sha256_hash!("risc0.ReceiptClaim".as_bytes()),
-    );
-    println!("test: {:?}", c_print2("CLAIM_INPUT", &claim.input.as_bytes()));
-    c_print("CLAIM_INPUT", &claim.input.as_bytes());
-    c_print("CLAIM_PRE", &claim.pre.digest().as_bytes());
-    c_print("CLAIM_POST", &claim.post.digest().as_bytes());
-    c_print("OUTPUT_TAG", &sha256_hash!("risc0.Output".as_bytes()));
-    c_print("JOURNAL", &receipt.journal.bytes);
-    c_print("ZEROS", &[0u8; 32]);
-    c_print("TWO_U16", &2u16.to_le_bytes());
-    c_print("FOUR_U16", &4u16.to_le_bytes());
-    c_print("ZERO_U32", &0u32.to_le_bytes());
+    template = template.replace("receipt_claim_tag", &bytes_to_str(&sha256_hash!("risc0.ReceiptClaim".as_bytes())));
+    template = template.replace("claim_input", &bytes_to_str(&claim.input.as_bytes()));
+    template = template.replace("claim_pre", &bytes_to_str(&claim.pre.digest().as_bytes()));
+    template = template.replace("claim_post", &bytes_to_str(&claim.post.digest().as_bytes()));
+    template = template.replace("output_tag", &bytes_to_str(&sha256_hash!("risc0.Output".as_bytes())));
+    template = template.replace("journal", &bytes_to_str(&receipt.journal.bytes));
+    template = template.replace("zeroes", &bytes_to_str(&[0u8; 32]));
+    template = template.replace("two_u16", &bytes_to_str(&2u16.to_le_bytes()));
+    template = template.replace("four_u16", &bytes_to_str(&4u16.to_le_bytes()));
+    template = template.replace("zero_u32", &bytes_to_str(&0u32.to_le_bytes()));
+
     let (a0, a1) = split_digest_custom(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap()); // This part is constant
 
-    // println!("const char* public_input_1 = {:?};", a0);
-    // println!("const char* public_input_2 = {:?};", a1);
-    c_print("FIRST_PUBLIC_INPUT", &a0.to_be_bytes());
-    c_print("SECOND_PUBLIC_INPUT", &a1.to_be_bytes());
+    template = template.replace("public_input_0", &bytes_to_str(&a0.to_be_bytes()));
+    template = template.replace("public_input_1", &bytes_to_str(&a1.to_be_bytes()));
 
     let claim_digest = sha256_hash!(
         sha256_hash!("risc0.ReceiptClaim".as_bytes()),
@@ -131,7 +132,37 @@ fn main() {
         ],
     };
     println!("Public inputs: {:?}", public_inputs);
-    let proof: ProofJson = from_str(&fs::read_to_string("./work_dir/proof.json").unwrap()).unwrap();
+    let proof: ProofJson = from_str(&read_to_string("./work_dir/proof.json").unwrap()).unwrap();
+    let proof2: ProofJson = from_str(&read_to_string("./work_dir/proof.json").unwrap()).unwrap();
+
+    let seal: Seal = proof2.try_into().unwrap();
+    let mut proof_a = seal.a;
+    let proof_b = seal.b;
+    let mut proof_c = seal.c;
+
+    if proof_a[1][31] % 2 == 1 {
+        proof_a[0][0] += 128;
+    }
+    proof_a[0].reverse();
+    let bytes_proof_a = &proof_a[0];
+    template = template.replace("proof_a", &bytes_to_str(&bytes_proof_a));
+
+    let mut proof_b_x = proof_b[0].clone();
+    if proof_b[1][0][31] % 2 == 1 {
+        proof_b_x[1][0] += 128;
+    }
+    proof_b_x[0].reverse();
+    proof_b_x[1].reverse();
+    let mut bytes_proof_b = proof_b_x[1].clone();
+    bytes_proof_b.extend(proof_b_x[0].iter());
+    template = template.replace("proof_b", &bytes_to_str(&bytes_proof_b));
+
+    if proof_c[1][31] % 2 == 1 {
+        proof_c[0][0] += 128;
+    }
+    proof_c[0].reverse();
+    let bytes_proof_c = &proof_c[0];
+    template = template.replace("proof_c", &bytes_to_str(&bytes_proof_c));
 
     let verifier = Verifier::new(
         &proof.try_into().unwrap(),
@@ -148,9 +179,11 @@ fn main() {
     }
 
     let proof: PublicProofJson =
-        from_str(&fs::read_to_string("./work_dir/proof.json").unwrap()).unwrap();
+        from_str(&read_to_string("./work_dir/proof.json").unwrap()).unwrap();
     c_print(
         "PROOF_PI_A0",
         &BigUint::from_str(&proof.pi_a[0]).unwrap().to_bytes_be(),
     );
+
+    write("groth16-verifier/constants.h", template).unwrap();
 }
