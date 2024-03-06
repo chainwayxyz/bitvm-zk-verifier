@@ -41,6 +41,10 @@ pub fn c_print(variable_name: &str, bytes: &[u8]) {
     println!("}};");
 }
 
+pub fn c_print2(variable_name: &str, bytes: &[u8]) -> String {
+    format!("const unsigned char {variable_name}[] = {{{b}}};", b = bytes.iter().map(|s| s.to_string()).collect::<Vec<String>>().join(", "))
+}
+
 macro_rules! sha256_hash {
     ($($data:expr),+) => {{
         let mut hasher = Sha256::new();
@@ -81,6 +85,7 @@ fn main() {
         "RECEIPT_CLAIM_TAG",
         &sha256_hash!("risc0.ReceiptClaim".as_bytes()),
     );
+    println!("test: {:?}", c_print2("CLAIM_INPUT", &claim.input.as_bytes()));
     c_print("CLAIM_INPUT", &claim.input.as_bytes());
     c_print("CLAIM_PRE", &claim.pre.digest().as_bytes());
     c_print("CLAIM_POST", &claim.post.digest().as_bytes());

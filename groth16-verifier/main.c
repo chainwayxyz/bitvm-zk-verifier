@@ -63,20 +63,20 @@ typedef struct {
 
 Proof get_proof() {
     Proof proof;
-    mclBnG1_deserialize(&proof.a, bytes_proof_a, 32);
-    mclBnG2_deserialize(&proof.b, bytes_proof_b, 64);
-    mclBnG1_deserialize(&proof.c, bytes_proof_c, 32);
+    mclBnG1_deserialize(&proof.a, BYTES_PROOF_A, 32);
+    mclBnG2_deserialize(&proof.b, BYTES_PROOF_B, 64);
+    mclBnG1_deserialize(&proof.c, BYTES_PROOF_C, 32);
     return proof;
 }
 
 VerifyKey get_vk() {
     VerifyKey vk;
-    mclBnG1_deserialize(&vk.alpha, bytes_alpha, 32);
-    mclBnG2_deserialize(&vk.beta, bytes_beta, 64);
-    mclBnG2_deserialize(&vk.gamma, bytes_gamma, 64);
-    mclBnG2_deserialize(&vk.delta, bytes_delta, 64);
+    mclBnG1_deserialize(&vk.alpha, BYTES_ALPHA, 32);
+    mclBnG2_deserialize(&vk.beta, BYTES_BETA, 64);
+    mclBnG2_deserialize(&vk.gamma, BYTES_GAMMA, 64);
+    mclBnG2_deserialize(&vk.delta, BYTES_DELTA, 64);
     for (int i = 0; i < NPI + 1; i++) {
-        mclBnG1_deserialize(&vk.gamma_abc[i], bytes_gamma_abc[i], 32);
+        mclBnG1_deserialize(&vk.gamma_abc[i], BYTES_GAMMA_ABC[i], 32);
     }
     mclBn_pairing(&vk.alpha_beta, &vk.alpha, &vk.beta);
     mclBnG2_neg(&vk.gamma_neg, &vk.gamma);
@@ -85,10 +85,10 @@ VerifyKey get_vk() {
 }
 
 PublicInputs get_public_inputs() {
-    complete_public_inputs(bytes_public_inputs);
+    complete_public_inputs(BYTES_PUBLIC_INPUTS);
     PublicInputs public_inputs;
     for (int i = 0; i < NPI; i++) {
-        mclBnFr_setLittleEndian(&public_inputs.public[i], bytes_public_inputs[i], 32);
+        mclBnFr_setLittleEndian(&public_inputs.public[i], BYTES_PUBLIC_INPUTS[i], 32);
     }
     return public_inputs;
 }

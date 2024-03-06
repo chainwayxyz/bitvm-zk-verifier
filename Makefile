@@ -24,4 +24,4 @@ groth16:
 	rm groth16-verifier/sha256.o
 
 clean:
-	rm $(EXE_DIR)/*
+	rm bin/*
