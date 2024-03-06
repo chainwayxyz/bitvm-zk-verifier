@@ -1,6 +1,8 @@
 #include <string.h>
 #include <mcl/bn_c256.h>
-#include "groth16_verifier.h"
+#include "vk.h"
+#include "proof.h"
+#include "first_two_public.h"
 #include "last_two_public.h"
 
 typedef struct {
