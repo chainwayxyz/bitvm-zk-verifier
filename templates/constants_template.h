@@ -27,8 +27,8 @@ const unsigned char ZERO_U32[] = {zero_u32};
 const unsigned char RECEIPT_CLAIM_TAG[] = {receipt_claim_tag};
 const unsigned char OUTPUT_TAG[] = {output_tag};
 const unsigned char CLAIM_INPUT[] = {claim_input};
-const unsigned char CLAIM_PRE[] = {178, 3, 235, 227, 173, 4, 140, 14, 8, 82, 19, 22, 206, 243, 26, 103, 182, 58, 190, 224, 119, 246, 26, 23, 200, 99, 229, 164, 163, 211, 253, 91};
-const unsigned char CLAIM_POST[] = {73, 23, 30, 65, 63, 87, 220, 212, 89, 52, 47, 51, 2, 248, 37, 190, 62, 44, 75, 72, 38, 238, 199, 26, 94, 1, 252, 9, 247, 215, 115, 159};
+const unsigned char CLAIM_PRE[] = {claim_pre};
+const unsigned char CLAIM_POST[] = {claim_post};
 
 // #######################
 // ### PROOF CONSTANTS ###

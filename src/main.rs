@@ -10,8 +10,8 @@ use sha2::Sha256;
 use std::fs::{write, read_to_string};
 use std::{fs::File, io::Cursor, path::Path};
 
-use hello_world::multiply;
-// use bitcoin_pow::calculate_pow;
+// use hello_world::multiply;
+use bitcoin_pow::calculate_pow;
 
 /// Merkle root of the RECURSION_CONTROL_IDS
 pub const ALLOWED_IDS_ROOT: &str =
@@ -45,8 +45,10 @@ macro_rules! sha256_hash {
 fn main() {
     let mut template = read_to_string("templates/constants_template.h").unwrap();
     
-    let (receipt, _) = multiply(101, 23);
+    // let (receipt, _) = multiply(101, 31);
+    let (receipt, _) = calculate_pow();
     let claim = receipt.get_claim().unwrap();
+    println!("Claim: {:?}", claim);
 
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
