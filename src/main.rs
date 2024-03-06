@@ -93,8 +93,6 @@ fn main() {
     let proof_b = seal.b;
     let mut proof_c = seal.c;
 
-    println!("proof a x: {:?}", proof_a[0]);
-    println!("proof a y: {:?}", proof_a[1]);
     if proof_a[1][31] % 2 == 1 {
         proof_a[0][0] += 128;
     }
