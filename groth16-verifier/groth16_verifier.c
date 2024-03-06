@@ -1,6 +1,7 @@
 #include <string.h>
 #include <mcl/bn_c256.h>
 #include "groth16_verifier.h"
+#include "last_two_public.h"
 
 typedef struct {
     mclBnG1 a;
@@ -47,6 +48,7 @@ VerifyKey get_vk() {
 }
 
 PublicInputs get_public_inputs() {
+    complete_public_inputs(bytes_public_inputs);
     PublicInputs public_inputs;
     for (int i = 0; i < NPI; i++) {
         mclBnFr_setLittleEndian(&public_inputs.public[i], bytes_public_inputs[i], 32);

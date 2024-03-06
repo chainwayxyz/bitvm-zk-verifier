@@ -15,14 +15,7 @@ MCL_LIBRARY?=$(MCL_LIB)/libmcl.a
 
 CFLAGS?=$(OPTIONS1) -I $(MCL_INCLUDE) $(OPTIONS2) $(OPTIONS3)
 
-groth16x:
-	$(CC) $(CFLAGS) -c groth16-verifier/groth16_verifier.c -o groth16-verifier/groth16_verifier.o -MMD -MP -MF groth16-verifier/groth16_verifier.d
-	rm groth16-verifier/groth16_verifier.d
-	$(CXX) groth16-verifier/groth16_verifier.o -o bin/groth16_verifier $(BN256_LIBRARY) $(MCL_LIBRARY)
-	rm groth16-verifier/groth16_verifier.o
-
-groth16: groth16-verifier/groth16_verifier.c groth16-verifier/groth16_verifier.h
-	# python3 generate_groth16_constants.py $(WORK_DIR)/public_inputs.json $(WORK_DIR)/proof.json $(WORK_DIR)/vk.json
+groth16:
 	$(CC) $(CFLAGS) -c groth16-verifier/groth16_verifier.c -o groth16-verifier/groth16_verifier.o -MMD -MP -MF groth16-verifier/groth16_verifier.d
 	rm groth16-verifier/groth16_verifier.d
 	gcc -c groth16-verifier/last_two_public.c -I groth16-verifier/ -o groth16-verifier/last_two_public.o

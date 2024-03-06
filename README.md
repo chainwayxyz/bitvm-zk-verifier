@@ -17,5 +17,5 @@ make expected && ./bin/expected
 works for hardcoded
 
 ```sh
-make groth16x && ./bin/groth16_verifier
+make groth16 && ./bin/groth16_verifier
 ```
