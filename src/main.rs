@@ -72,7 +72,7 @@ pub struct PublicProofJson {
 fn main() {
     let mut template = read_to_string("groth16-verifier/constants_template.h").unwrap();
     
-    let (receipt, _) = multiply(101, 97);
+    let (receipt, _) = multiply(101, 23);
     // let (receipt, _) = calculate_pow();
     let claim = receipt.get_claim().unwrap();
 
