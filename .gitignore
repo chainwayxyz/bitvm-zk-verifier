@@ -1,9 +1,10 @@
 .DS_Store
-Cargo.lock
-circuits/operator/guest/Cargo.lock
-**target/
+**/Cargo.lock
+**/target/
 .env
 /work_dir/input.json
 a
 /temp/
 groth16-verifier-old
+mcl/
+bin/*
