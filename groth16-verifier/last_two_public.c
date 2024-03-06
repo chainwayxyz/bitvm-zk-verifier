@@ -16,6 +16,8 @@ void complete_public_inputs(unsigned char public_inputs[][32]) {
     sha256_update(&output_ctx, OUTPUT_TAG, sizeof(OUTPUT_TAG)/sizeof(unsigned char));
 
     sha256_update(&claim_ctx, CLAIM_POST, sizeof(CLAIM_POST)/sizeof(unsigned char));
+
+    /// CUTOFF
     sha256_update(&journal_ctx, JOURNAL, sizeof(JOURNAL)/sizeof(unsigned char));
     sha256_final(&journal_ctx, buf);
     
