@@ -92,7 +92,7 @@ fn main() {
     template = template.replace("claim_pre", &bytes_to_str(&claim.pre.digest().as_bytes()));
     template = template.replace("claim_post", &bytes_to_str(&claim.post.digest().as_bytes()));
     template = template.replace("output_tag", &bytes_to_str(&sha256_hash!("risc0.Output".as_bytes())));
-    template = template.replace("journal", &bytes_to_str(&receipt.journal.bytes));
+    template = template.replace("journalx", &bytes_to_str(&receipt.journal.bytes));
     template = template.replace("zeroes", &bytes_to_str(&[0u8; 32]));
     template = template.replace("two_u16", &bytes_to_str(&2u16.to_le_bytes()));
     template = template.replace("four_u16", &bytes_to_str(&4u16.to_le_bytes()));
@@ -100,8 +100,8 @@ fn main() {
 
     let (a0, a1) = split_digest_custom(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap()); // This part is constant
 
-    template = template.replace("public_input_0", &bytes_to_str(&a0.to_be_bytes()));
-    template = template.replace("public_input_1", &bytes_to_str(&a1.to_be_bytes()));
+    template = template.replace("public_input_0", &bytes_to_str(&a0.to_le_bytes()));
+    template = template.replace("public_input_1", &bytes_to_str(&a1.to_le_bytes()));
 
     let claim_digest = sha256_hash!(
         sha256_hash!("risc0.ReceiptClaim".as_bytes()),
@@ -119,8 +119,8 @@ fn main() {
         4u16.to_le_bytes()
     );
     let (c0, c1) = split_digest_custom(claim_digest.into());
-    c_print("EXPECTED_THIRD_PUBLIC_INPUT", &c0.to_be_bytes());
-    c_print("EXPECTED_FOURTH_PUBLIC_INPUT", &c1.to_be_bytes());
+    c_print("EXPECTED_THIRD_PUBLIC_INPUT", &c0.to_le_bytes());
+    c_print("EXPECTED_FOURTH_PUBLIC_INPUT", &c1.to_le_bytes());
 
     // Test to verify
     let public_inputs: PublicInputsJson = PublicInputsJson {
