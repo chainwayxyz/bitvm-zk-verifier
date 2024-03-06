@@ -125,6 +125,7 @@ fn main() {
             c1.to_string(),
         ],
     };
+    println!("Public inputs: {:?}", public_inputs);
     let proof: ProofJson = from_str(&fs::read_to_string("./work_dir/proof.json").unwrap()).unwrap();
 
     let verifier = Verifier::new(
