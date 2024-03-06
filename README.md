@@ -9,5 +9,13 @@ sudo docker run --rm -v /home/ekrem/bridge/risc0tobitvm/risc0tobitvm/work_dir:/m
 ```
 
 ```bash
-gcc groth16-verifier/main.c groth16-verifier/sha256.c -I groth16-verifier/ -oa && ./a
+make expected && ./bin/expected
+```
+
+### Groth16 Verifier
+
+works for hardcoded
+
+```sh
+make groth16x && ./bin/groth16_verifier
 ```
