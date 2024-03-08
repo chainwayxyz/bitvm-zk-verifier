@@ -14,7 +14,7 @@
 
 #![doc = include_str!("../README.md")]
 
-use hello_world_methods::MULTIPLY_ELF;
+pub use hello_world_methods::MULTIPLY_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 
 // This is a Hello World demo for the RISC Zero zkVM.

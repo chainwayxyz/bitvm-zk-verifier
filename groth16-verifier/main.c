@@ -58,10 +58,20 @@ PublicInputs get_public_inputs() {
     return public_inputs;
 }
 
-mclBnG1 prepare_inputs(VerifyKey vk, PublicInputs public_inputs) {
+mclBnG1 prepare_inputs_pre_cutoff(VerifyKey vk, PublicInputs public_inputs) {
     mclBnG1 res = vk.gamma_abc[0];
     mclBnG1 mul;
-    for (int i = 0; i < NPI; i++) {
+    for (int i = 0; i < NPI / 2; i++) {
+        mclBnG1_mul(&mul, &vk.gamma_abc[i + 1], &public_inputs.public[i]);
+        mclBnG1_add(&res, &res, &mul);
+    }
+    return res;
+}
+
+mclBnG1 prepare_inputs(VerifyKey vk, PublicInputs public_inputs, mclBnG1 partially_prepared_input) {
+    mclBnG1 res = partially_prepared_input;
+    mclBnG1 mul;
+    for (int i = NPI / 2; i < NPI; i++) {
         mclBnG1_mul(&mul, &vk.gamma_abc[i + 1], &public_inputs.public[i]);
         mclBnG1_add(&res, &res, &mul);
     }
@@ -78,11 +88,6 @@ int verify_proof_with_prepared_inputs(VerifyKey vk, Proof proof, mclBnG1 prepare
     mclBnGT_mul(&mul, &mul, &ml3);
     mclBn_finalExp(&mul, &mul);
     return mclBnGT_isEqual(&mul, &vk.alpha_beta);
-}
-
-int verify_proof(VerifyKey vk, Proof proof, PublicInputs public_inputs) {
-    mclBnG1 prepared_input = prepare_inputs(vk, public_inputs);
-    return verify_proof_with_prepared_inputs(vk, proof, prepared_input);
 }
 
 int main() {
@@ -102,6 +107,7 @@ int main() {
 
     // not fully initialized (missing 3rd and 4th public inputs)
     PublicInputs public_inputs = get_public_inputs();
+    mclBnG1 partially_prepared_input = prepare_inputs_pre_cutoff(vk, public_inputs);
 
     /// CUTOFF
 
@@ -128,6 +134,6 @@ int main() {
     }
 
     Proof proof = get_proof();
-    int a = verify_proof(vk, proof, public_inputs);
-    return 1 - a;
+    mclBnG1 prepared_input = prepare_inputs(vk, public_inputs, partially_prepared_input);
+    return 1 - verify_proof_with_prepared_inputs(vk, proof, prepared_input);
 }
