@@ -16,17 +16,12 @@ MCL_LIBRARY?=$(MCL_LIB)/libmcl.a
 CFLAGS?=$(OPTIONS1) -I $(MCL_INCLUDE) $(OPTIONS2) $(OPTIONS3)
 
 groth16:
-	$(CC) $(CFLAGS) -c groth16-verifier/groth16_verifier.c -o groth16-verifier/groth16_verifier.o -MMD -MP -MF groth16-verifier/groth16_verifier.d
-	rm groth16-verifier/groth16_verifier.d
-	gcc -c groth16-verifier/last_two_public.c -I groth16-verifier/ -o groth16-verifier/last_two_public.o
+	$(CC) $(CFLAGS) -c groth16-verifier/main.c -o groth16-verifier/main.o -MMD -MP -MF groth16-verifier/main.d
+	rm groth16-verifier/main.d
 	gcc -c groth16-verifier/sha256.c -I groth16-verifier/ -o groth16-verifier/sha256.o
-	$(CXX) groth16-verifier/sha256.o groth16-verifier/last_two_public.o groth16-verifier/groth16_verifier.o -o bin/groth16_verifier $(BN256_LIBRARY) $(MCL_LIBRARY)
-	rm groth16-verifier/groth16_verifier.o
-	rm groth16-verifier/last_two_public.o
+	$(CXX) groth16-verifier/sha256.o groth16-verifier/main.o -o bin/groth16_verifier $(BN256_LIBRARY) $(MCL_LIBRARY)
+	rm groth16-verifier/main.o
 	rm groth16-verifier/sha256.o
 
-expected: groth16-verifier/main.c groth16-verifier/sha256.c
-	gcc groth16-verifier/main.c groth16-verifier/sha256.c -I groth16-verifier/ -o bin/expected
-
 clean:
-	rm $(EXE_DIR)/*
+	rm bin/*
