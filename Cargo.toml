@@ -1,5 +1,5 @@
 [package]
-name = "end2endbitvm"
+name = "risc0tobitvm"
 version = "0.1.0"
 edition = "2021"
 
