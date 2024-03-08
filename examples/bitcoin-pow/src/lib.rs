@@ -1,7 +1,7 @@
 #![doc = include_str!("../README.md")]
 
 use bitcoin::{block::Header, consensus::deserialize, secp256k1};
-use bitcoin_pow_methods::CALCULATE_POW_ELF;
+pub use bitcoin_pow_methods::CALCULATE_POW_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 use secp256k1::hashes::Hash;
 

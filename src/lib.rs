@@ -4,11 +4,12 @@ use risc0_groth16::{PublicInputsJson, Seal};
 use risc0_groth16::{to_json, ProofJson, Verifier};
 use risc0_zkvm::sha::{Digest, Digestible};
 use risc0_zkvm::Receipt;
-use risc0_zkvm::{get_prover_server, recursion::identity_p254, ProverOpts};
+use risc0_zkvm::{get_prover_server, recursion::identity_p254, ProverOpts, GUEST_MAX_MEM};
+use risc0_binfmt::{MemoryImage, Program};
 use serde_json::from_str;
 use sha2::Digest as OtherDigest;
 use sha2::Sha256;
-use std::fs::{write, read_to_string};
+use std::fs::read_to_string;
 use std::{fs::File, io::Cursor, path::Path};
 
 /// Merkle root of the RECURSION_CONTROL_IDS
@@ -40,11 +41,27 @@ macro_rules! sha256_hash {
     }};
 }
 
-pub fn risc0_test(receipt: &Receipt) {
-    let mut template = read_to_string("templates/constants_template.h").unwrap();
+pub fn setup(elf: &[u8], template: &mut String) {
+    const PAGE_SIZE: u32 = 1024;
+    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32).unwrap();
+    let image = MemoryImage::new(&program, PAGE_SIZE).unwrap();
+    let system_state = image.get_system_state().unwrap();
 
+    let (a0, a1) = split_digest_custom(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap()); // This part is constant
+    *template = template.replace("public_input_0", &bytes_to_str(&a0.to_le_bytes()));
+    *template = template.replace("public_input_1", &bytes_to_str(&a1.to_le_bytes()));
+    *template = template.replace("receipt_claim_tag", &bytes_to_str(&sha256_hash!("risc0.ReceiptClaim".as_bytes())));
+    *template = template.replace("output_tag", &bytes_to_str(&sha256_hash!("risc0.Output".as_bytes())));
+    *template = template.replace("claim_input", &bytes_to_str(&[0u8; 32]));
+    *template = template.replace("claim_pre", &bytes_to_str(&system_state.digest().as_bytes()));
+    *template = template.replace("zeroes", &bytes_to_str(&[0u8; 32]));
+    *template = template.replace("two_u16", &bytes_to_str(&2u16.to_le_bytes()));
+    *template = template.replace("four_u16", &bytes_to_str(&4u16.to_le_bytes()));
+    *template = template.replace("zero_u32", &bytes_to_str(&0u32.to_le_bytes()));
+}
+
+pub fn prove(receipt: &Receipt, template: &mut String) {
     let claim = receipt.get_claim().unwrap();
-    println!("Claim: {:?}", claim);
 
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
@@ -126,21 +143,9 @@ pub fn risc0_test(receipt: &Receipt) {
         println!("run:\nsudo docker run --rm -v /home/ekrem/bridge/risc0tobitvm/risc0tobitvm/work_dir:/mnt risc0-groth16-prover");
     }
 
-    template = template.replace("receipt_claim_tag", &bytes_to_str(&sha256_hash!("risc0.ReceiptClaim".as_bytes())));
-    template = template.replace("claim_input", &bytes_to_str(&claim.input.as_bytes()));
-    template = template.replace("claim_pre", &bytes_to_str(&claim.pre.digest().as_bytes()));
-    template = template.replace("claim_post", &bytes_to_str(&claim.post.digest().as_bytes()));
-    template = template.replace("output_tag", &bytes_to_str(&sha256_hash!("risc0.Output".as_bytes())));
-    template = template.replace("journalx", &bytes_to_str(&receipt.journal.bytes));
-    template = template.replace("zeroes", &bytes_to_str(&[0u8; 32]));
-    template = template.replace("two_u16", &bytes_to_str(&2u16.to_le_bytes()));
-    template = template.replace("four_u16", &bytes_to_str(&4u16.to_le_bytes()));
-    template = template.replace("zero_u32", &bytes_to_str(&0u32.to_le_bytes()));
-    template = template.replace("public_input_0", &bytes_to_str(&a0.to_le_bytes()));
-    template = template.replace("public_input_1", &bytes_to_str(&a1.to_le_bytes()));
-    template = template.replace("proof_a", &bytes_to_str(&bytes_proof_a));
-    template = template.replace("proof_b", &bytes_to_str(&bytes_proof_b));
-    template = template.replace("proof_c", &bytes_to_str(&bytes_proof_c));
-    
-    write("groth16-verifier/constants.h", template).unwrap();
+    *template = template.replace("claim_post", &bytes_to_str(&claim.post.digest().as_bytes()));
+    *template = template.replace("journalx", &bytes_to_str(&receipt.journal.bytes));
+    *template = template.replace("proof_a", &bytes_to_str(&bytes_proof_a));
+    *template = template.replace("proof_b", &bytes_to_str(&bytes_proof_b));
+    *template = template.replace("proof_c", &bytes_to_str(&bytes_proof_c));
 }

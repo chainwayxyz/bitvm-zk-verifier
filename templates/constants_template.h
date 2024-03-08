@@ -14,6 +14,11 @@ const unsigned char BYTES_GAMMA_ABC[5][32] = {{187, 87, 190, 34, 163, 78, 141, 2
 // first two public inputs are constant
 unsigned char BYTES_PUBLIC_INPUTS[NPI][32] = {{public_input_0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {public_input_1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
+// receipt claim tag, output tag, claim input
+const unsigned char RECEIPT_CLAIM_TAG[] = {receipt_claim_tag};
+const unsigned char OUTPUT_TAG[] = {output_tag};
+const unsigned char CLAIM_INPUT[] = {claim_input};
+
 // helper
 const unsigned char ZEROS[] = {zeroes};
 const unsigned char TWO_U16[] = {two_u16};
@@ -24,15 +29,14 @@ const unsigned char ZERO_U32[] = {zero_u32};
 // ### CIRCUIT CONSTANTS ###
 // #########################
 
-const unsigned char RECEIPT_CLAIM_TAG[] = {receipt_claim_tag};
-const unsigned char OUTPUT_TAG[] = {output_tag};
-const unsigned char CLAIM_INPUT[] = {claim_input};
 const unsigned char CLAIM_PRE[] = {claim_pre};
-const unsigned char CLAIM_POST[] = {claim_post};
 
 // #######################
 // ### PROOF CONSTANTS ###
 // #######################
+
+// claim post
+const unsigned char CLAIM_POST[] = {claim_post};
 
 // proof
 const unsigned char BYTES_PROOF_A[32] = {proof_a};

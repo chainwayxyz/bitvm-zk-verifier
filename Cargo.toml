@@ -16,4 +16,5 @@ sha2 = {version="=0.10.6", default-features = false}
 hello-world = {path="./examples/hello-world"}
 bitcoin-pow = {path="./examples/bitcoin-pow"}
 num-bigint = "0.4.4"
+risc0-binfmt = { path="../risc0/risc0/binfmt"}
 
