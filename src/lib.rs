@@ -140,7 +140,7 @@ pub fn prove(receipt: &Receipt, template: &mut String) {
 
     if verification_result.is_err() {
         println!("Groth16 input is written to work_dir/input.json");
-        println!("run:\nsudo docker run --rm -v /home/ekrem/bridge/risc0tobitvm/risc0tobitvm/work_dir:/mnt risc0-groth16-prover");
+        println!("run:\nsudo docker run --rm -v ./work_dir:/mnt risc0-groth16-prover");
     }
 
     *template = template.replace("claim_post", &bytes_to_str(&claim.post.digest().as_bytes()));

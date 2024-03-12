@@ -7,37 +7,36 @@ OPTIONS1?=-g3 -Wall -Wextra -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings 
 OPTIONS2?=-fomit-frame-pointer -DNDEBUG -fno-stack-protector -O3 -fpic
 OPTIONS3?=-DMCL_USE_LLVM=1 -DMCL_BINT_ASM=1 -DMCL_BINT_ASM_X64=0 
 
-MCL?=mcl
-MCL_INCLUDE?=$(MCL)/include
-MCL_LIB?=$(MCL)/lib
-BN256_LIBRARY?=$(MCL_LIB)/libmclbn256.a
-MCL_LIBRARY?=$(MCL_LIB)/libmcl.a
+MCL_DIR?=mcl
+MCL_MAKEFILE = Makefile.cross
+MCL_INCLUDE?=$(MCL_DIR)/include
+MCL_LIB?=$(MCL_DIR)/lib
+# BN256_LIBRARY?=$(MCL_LIB)/libmclbn384_256.a
+MCL_LIBRARY?=$(MCL_LIB)/libmclbn384_256.a
+BIT = 32
+TARGET = riscv32
+
+OBJ_DIR?=obj
 
 CFLAGS?=$(OPTIONS1) -I $(MCL_INCLUDE) $(OPTIONS2) $(OPTIONS3)
 
-groth16:
-	$(CC) $(CFLAGS) -c groth16-verifier/main.c -o groth16-verifier/main.o -MMD -MP -MF groth16-verifier/main.d
-	rm groth16-verifier/main.d
-	gcc -c groth16-verifier/sha256.c -I groth16-verifier/ -o groth16-verifier/sha256.o
-	$(CXX) groth16-verifier/sha256.o groth16-verifier/main.o -o bin/groth16_verifier $(BN256_LIBRARY) $(MCL_LIBRARY)
-	rm groth16-verifier/main.o
-	rm groth16-verifier/sha256.o
+.PHONY: mcl
+
+# Always run the make command for mcl, as mcl is a phony target
+mcl:
+	$(MAKE) -C $(MCL_DIR) -f $(MCL_MAKEFILE) BIT=$(BIT) TARGET=$(TARGET)
 
 transpiler:
-	clang -Ofast -c src/zkverifier.c -o execs/zkverifier.o  -I ./mcl/include -I ./mcl/src -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
-	riscv32-unknown-elf-gcc -Ofast -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -T linkers/link.ld ./start.S execs/zkverifier.o mcl/lib/libmclbn384_256.a -o execs/zkverifier -Wl,--wrap=malloc,--wrap=free  -march=rv32i -mabi=ilp32 -lgcc
-	# riscv32-unknown-elf-objcopy -O binary execs/zkverifier execs/out_binary.bin
+	@echo "\033[92m Compile each source file to an individual object file \033[0m"
+	clang -O3 -c groth16-verifier/main.c -o $(OBJ_DIR)/main.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
+	clang -O3 -c groth16-verifier/sha256.c -o $(OBJ_DIR)/sha256.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
 
-	# echo "Running emu-rv32i"
-	# ./emu-rv32i execs/zkverifier
-	# riscv64-unknown-elf-objdump -Mno-aliases -d execs/zkverifier  > dumps/zkverifier.dump
-	# npx ts-node --files main.ts ./execs/zkverifier 
 
-	# ./emu-rv32i execs/zkverifier > dumps/emulator_execution.dump
-	echo "Running bitvm"
-	cd rv32i-to-bitvm
-	npx ts-node --files main.ts ../execs/zkverifier > ../dumps/bitvm_execution.dump
-	cd ..
+	@echo "\033[92m Link the object files along with the start file and static library into the final executable \033[0m"
+	riscv32-unknown-elf-gcc -O3 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -T linkers/link.ld ./start.S $(OBJ_DIR)/main.o $(OBJ_DIR)/sha256.o mcl/lib/libmclbn384_256.a -o $(OBJ_DIR)/zkverifier -Wl,--wrap=malloc,--wrap=free -march=rv32i -mabi=ilp32 -lgcc
+
+	@echo "\033[92m Running BitVM This can take a while \033[0m"
+	npx ts-node --files rv32i-to-bitvm/main.ts obj/zkverifier
 
 clean:
 	rm bin/*

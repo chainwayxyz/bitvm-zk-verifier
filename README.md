@@ -1,22 +1,24 @@
 # Currently RISC0 to Groth16
 
+## To run the RISC0 prover:
+
 ```bash
 RISC0_DEV_MODE=0 cargo run --release
 ```
 
+## To Transpile to BitVM instruction sets
+
+First follow the instructions in the repository https://github.com/sifive/riscv-llvm to install RISCV toolchain
+
+Then
+
 ```bash
-sudo docker run --rm -v /home/ekrem/bridge/risc0tobitvm/risc0tobitvm/work_dir:/mnt risc0-groth16-prover
+make mcl
+make transpiler
 ```
 
-### Groth16 Verifier
-
-```sh
-git clone https://github.com/herumi/mcl
-cd mcl
-make -j4
-cd ..
+Expected output:
 ```
-
-```sh
-make groth16 && ./bin/groth16_verifier
+Step count =  12568999252
+obj/zkverifier result code: 1 0
 ```
