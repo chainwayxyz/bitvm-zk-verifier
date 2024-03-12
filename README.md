@@ -22,3 +22,10 @@ Expected output:
 Step count =  12568999252
 obj/zkverifier result code: 1 0
 ```
+
+Until Cut-off
+
+```
+Step count =  8146664132
+obj/zkverifier result code: 1 0
+```
