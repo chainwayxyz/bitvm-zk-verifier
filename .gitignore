@@ -8,3 +8,4 @@ a
 groth16-verifier-old
 bin/*
 obj/*
+bitvm.json

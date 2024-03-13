@@ -17,4 +17,9 @@ hello-world = {path="./examples/hello-world"}
 bitcoin-pow = {path="./examples/bitcoin-pow"}
 num-bigint = "0.4.4"
 risc0-binfmt = { path="../risc0/risc0/binfmt"}
+blake3 = "1.5.0"
+
+[[bin]]
+name = "bitvm"
+path = "src/bitvm.rs"
 
