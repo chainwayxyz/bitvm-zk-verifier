@@ -1,109 +1,11 @@
-#include "sha256.h"
-#include "constants.h"
-
-#include <string.h>
 #include <mcl/bn_c384_256.h>
-
-
+#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
 
-// Memory Pool Size
-#define MEMORY_POOL_SIZE 1024 * 4 // 1MB
-
-// Custom memory pool
-static uint8_t memory_pool[MEMORY_POOL_SIZE];
-static size_t memory_pool_index = 0;
-
-void *custom_malloc(size_t size) {
-    if (memory_pool_index + size > MEMORY_POOL_SIZE){
-        return NULL;}
-    void *ptr = memory_pool + memory_pool_index;
-    memory_pool_index += size;
-    return ptr;
-}
-
-void custom_free(void *ptr) {
-    // Simplistic implementation, does not actually free memory
-}
-
-void *memcpy(void *dest, const void *src, size_t n) {
-    char *dp = dest;
-    const char *sp = src;
-    while (n--) *dp++ = *sp++;
-    return dest;
-}
-
-void *memset(void *s, int c, size_t n) {
-    unsigned char* p = s;
-    while (n--) *p++ = (unsigned char)c;
-    return s;
-}
-
-size_t strlen(const char *str) {
-    const char *s;
-    for (s = str; *s; ++s);
-    return (s - str);
-}
-
-int strcmp(const char *str1, const char *str2) {
-    while (*str1 && (*str1 == *str2)) {
-        str1++, str2++;
-    }
-    return *(const unsigned char*)str1 - *(const unsigned char*)str2;
-}
-
-// Dummy implementations for required functions
-void __cxa_atexit() {}
-void *__dso_handle;
-
-
-
-void *sbrk(intptr_t increment) {
-    static char *heap_end;
-    char *prev_heap_end;
-
-    if (heap_end == 0) {
-        heap_end = (char *)&memory_pool;
-    }
-    prev_heap_end = heap_end;
-
-    if (heap_end + increment > memory_pool + MEMORY_POOL_SIZE) {
-        return (void *)-1;
-    }
-
-    heap_end += increment;
-    return (void *)prev_heap_end;
-}
-
-void *__wrap_malloc(size_t size) {
-    return custom_malloc(size);
-}
-
-void *__wrap_free(void *ptr) {
-    custom_free(ptr);
-}
-
-
-typedef struct _FILE FILE;
-FILE* fopen(const char *filename, const char *mode) {
-    // Stub implementation
-    return NULL;
-}
-
-int fclose(FILE *stream) {
-    // while(1);
-    // Stub implementation
-    return 0; // Typically EOF is used to indicate failure
-}
-
-size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
-    // while(1);
-    // Stub implementation
-    return 0; // Indicating no items were read
-}
-
-
+// Sha256 implementaion from https://github.com/B-Con/crypto-algorithms/blob/master/sha256.c
+#include "sha256.h"
+#include "constants.h"
 
 BYTE buf[SHA256_BLOCK_SIZE];
 SHA256_CTX output_ctx, claim_ctx, journal_ctx;
@@ -237,4 +139,59 @@ int main() {
     Proof proof = get_proof();
     mclBnG1 prepared_input = prepare_inputs(vk, public_inputs, partially_prepared_input);
     return 1 - verify_proof_with_prepared_inputs(vk, proof, prepared_input);
+}
+
+
+/// For bare metal:
+
+void *memcpy(void *dest, const void *src, size_t n) {
+    char *dp = dest;
+    const char *sp = src;
+    while (n--) *dp++ = *sp++;
+    return dest;
+}
+
+void *memset(void *s, int c, size_t n) {
+    unsigned char* p = s;
+    while (n--) *p++ = (unsigned char)c;
+    return s;
+}
+
+size_t strlen(const char *str) {
+    const char *s;
+    for (s = str; *s; ++s);
+    return (s - str);
+}
+
+int strcmp(const char *str1, const char *str2) {
+    while (*str1 && (*str1 == *str2)) {
+        str1++, str2++;
+    }
+    return *(const unsigned char*)str1 - *(const unsigned char*)str2;
+}
+
+void __cxa_atexit() {}
+void *__dso_handle;
+
+
+void *__wrap_malloc(size_t size) {
+    return NULL;
+}
+
+void *__wrap_free(void *ptr) {
+    return NULL;
+}
+
+
+typedef struct _FILE FILE;
+FILE* fopen(const char *filename, const char *mode) {
+    return NULL;
+}
+
+int fclose(FILE *stream) {
+    return 0;
+}
+
+size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+    return 0;
 }

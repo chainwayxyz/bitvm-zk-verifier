@@ -8,4 +8,6 @@ a
 groth16-verifier-old
 bin/*
 obj/*
+!obj/.emptydir
+!bin/zkverifier
 bitvm.json

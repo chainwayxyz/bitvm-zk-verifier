@@ -18,6 +18,7 @@ BIT = 32
 TARGET = riscv32
 
 OBJ_DIR?=obj
+BIN_DIR?=bin
 
 CFLAGS?=$(OPTIONS1) -I $(MCL_INCLUDE) $(OPTIONS2) $(OPTIONS3)
 
@@ -27,17 +28,16 @@ CFLAGS?=$(OPTIONS1) -I $(MCL_INCLUDE) $(OPTIONS2) $(OPTIONS3)
 mcl:
 	$(MAKE) -C $(MCL_DIR) -f $(MCL_MAKEFILE) BIT=$(BIT) TARGET=$(TARGET)
 
-transpiler:
-	@echo "\033[92m Compile each source file to an individual object file \033[0m"
+zkverifier:
+	@echo "\033[92mCompile each source file to an individual object file \033[0m"
 	$(CLANG) -O3 -c groth16-verifier/main.c -o $(OBJ_DIR)/main.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
 	$(CLANG) -O3 -c groth16-verifier/sha256.c -o $(OBJ_DIR)/sha256.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
 
 
-	@echo "\033[92m Link the object files along with the start file and static library into the final executable \033[0m"
-	riscv32-unknown-elf-gcc -O3 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -T linkers/link.ld ./start.S $(OBJ_DIR)/main.o $(OBJ_DIR)/sha256.o mcl/lib/libmclbn384_256.a -o $(OBJ_DIR)/zkverifier -Wl,--wrap=malloc,--wrap=free -march=rv32i -mabi=ilp32 -lgcc
-
-	@echo "\033[92m Running BitVM This can take a while \033[0m"
-	npx ts-node --files rv32i-to-bitvm/main.ts obj/zkverifier
+	@echo "\033[92mLink the object files along with the start file and static library into the final executable \033[0m"
+	riscv32-unknown-elf-gcc -O3 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -T linkers/link.ld ./start.S $(OBJ_DIR)/main.o $(OBJ_DIR)/sha256.o mcl/lib/libmclbn384_256.a -o $(BIN_DIR)/zkverifier -Wl,--wrap=malloc,--wrap=free -march=rv32i -mabi=ilp32 -lgcc
 
 clean:
-	rm bin/*
+	$(RM) $(OBJ_DIR)/main.o
+	$(RM) $(OBJ_DIR)/sha256.o
+	$(RM) $(BIN_DIR)/zkverifier
