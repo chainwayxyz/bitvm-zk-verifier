@@ -108,7 +108,7 @@ pub fn build_tree(leaves: &[u32]) -> [u8; 20] {
     if leaves.len() == 0 { panic!("leaves is empty") }
 
     // Pad each leaf with zeros
-    let mut leaves160 = Vec::with_capacity(leaves.len() + 1);
+    let mut leaves160 = Vec::with_capacity(leaves.len() + (leaves.len() & 1));
     for leaf in leaves {
         let mut leaf160 = [0u8; 20];
         leaf160[..4].copy_from_slice(&leaf.to_le_bytes());
@@ -148,7 +148,7 @@ pub fn build_path(leaves: &[u32], index: u32) -> Vec<[u8; 20]> {
     if leaves.len() == 0 { panic!("leaves is empty") }
 
     // Pad each leaf with zeros
-    let mut leaves160 = Vec::with_capacity(leaves.len() + 1);
+    let mut leaves160 = Vec::with_capacity(leaves.len() + (leaves.len() & 1));
     for leaf in leaves {
         let mut leaf160 = [0u8; 20];
         leaf160[..4].copy_from_slice(&leaf.to_le_bytes());
