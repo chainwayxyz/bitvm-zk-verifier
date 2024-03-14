@@ -1,5 +1,5 @@
 # BitVM ZK Verifier
-With the goal of **being able to prove anything on Bitcoin**, this repository is a toolkit to generate a Groth16 verifier in BitVM. Full flow includes:
+With the goal of **being able to prove anything on Bitcoin**, this repository is a toolkit for generating a Groth16 verifier in BitVM. The full flow includes:
 
 1. Creating STARK proof from a RISC Zero guest program (written in Rust)
 2. Wrapping the STARK proof into a Groth16 proof
