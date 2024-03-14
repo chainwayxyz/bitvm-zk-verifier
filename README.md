@@ -16,6 +16,7 @@ To clone this repo with submodules:
 
 ```
 git clone --recurse-submodules https://github.com/chainwayxyz/bitvm-zk-verifier.git
+cd bitvm-zk-verifier
 ```
 
 
@@ -31,14 +32,13 @@ yarn
 cd ..
 ```
 
-Build the mcl library for pairing operations:
-```
-make mcl
-```
 
 To compile the groth16 verifier you will need the clang and riscv32 toolchain, follow the instructions in https://github.com/sifive/riscv-llvm
 
+**Note:** You can skip this step if you don't want to build the zk verifier binary. 
+
 ```
+make mcl
 make zkverifier
 ```
 
@@ -71,10 +71,15 @@ We already placed a valid proof for Bitcoin proof of work in `work_dir/proof.jso
 
 In order to generate groth16 proofs, follow steps in [RISCZero repository](https://github.com/risc0/risc0/blob/main/compact_proof/README.md).
 
+## References
+
+Thanks to the BitVM team for their [BitVM implementation](https://github.com/BitVM/BitVM) and Carsten Munk for their [transpiler work](https://github.com/zippiehq/rv32i-to-bitvm/)
+
+The BitVM emulator used in this repo is forked from the BitVM repository, with additional RSHIFT8 and LSHIFT8 instructions.
 
 ## TODOs
 
-- Skip initializations to reduce the step count
-- 
+- [ ] Skip initializations to reduce the step count
+
 ## License
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details. By using, distributing, or contributing to this software, you agree to the terms and conditions of the GPLv3.
