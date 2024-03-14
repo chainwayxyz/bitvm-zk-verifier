@@ -1,5 +1,6 @@
 CC?=cc
 CXX?=c++
+CLANG?=clang
 
 WORK_DIR?=work_dir
 
@@ -28,8 +29,8 @@ mcl:
 
 transpiler:
 	@echo "\033[92m Compile each source file to an individual object file \033[0m"
-	clang -O3 -c groth16-verifier/main.c -o $(OBJ_DIR)/main.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
-	clang -O3 -c groth16-verifier/sha256.c -o $(OBJ_DIR)/sha256.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
+	$(CLANG) -O3 -c groth16-verifier/main.c -o $(OBJ_DIR)/main.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
+	$(CLANG) -O3 -c groth16-verifier/sha256.c -o $(OBJ_DIR)/sha256.o -I $(MCL_INCLUDE) -I $(MCL_DIR)/src -I groth16-verifier -mcmodel=medany -march=rv32i -mabi=ilp32 --target=riscv32
 
 
 	@echo "\033[92m Link the object files along with the start file and static library into the final executable \033[0m"
