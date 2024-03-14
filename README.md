@@ -79,6 +79,8 @@ The BitVM emulator used in this repo is forked from the BitVM repository, with a
 
 ## TODOs
 
+- [ ] Rewrite the transpiler with rust
+- [ ] Get rid of dummy instructions in the transpiler for jump operations
 - [ ] Skip initializations to reduce the step count
 
 ## License
