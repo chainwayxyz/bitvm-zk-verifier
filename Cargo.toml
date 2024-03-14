@@ -7,16 +7,16 @@ edition = "2021"
 
 [dependencies]
 hex = "0.4.3"
-risc0-zkvm = { path="../risc0/risc0/zkvm", features = ["prove"]}
+risc0-zkvm = { version="0.21.0", features = ["prove"]}
 env_logger = "0.10"
 serde = "1.0"
 serde_json = "1.0.108"
-risc0-groth16 = {path="../risc0/risc0/groth16", features=["prove"]}
+risc0-groth16 = {version="0.21.0", features=["prove"]}
 sha2 = {version="=0.10.6", default-features = false}
 hello-world = {path="./examples/hello-world"}
 bitcoin-pow = {path="./examples/bitcoin-pow"}
 num-bigint = "0.4.4"
-risc0-binfmt = { path="../risc0/risc0/binfmt"}
+risc0-binfmt = "0.21.0"
 blake3 = "1.5.0"
 
 [[bin]]

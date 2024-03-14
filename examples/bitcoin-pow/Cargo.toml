@@ -8,7 +8,7 @@ bitcoin = { version = "0.31.1", features = ["bitcoinconsensus"] }
 bitcoin-pow-methods = { path = "methods" }
 hex = "0.4.3"
 
-risc0-zkvm = { path="../../../risc0/risc0/zkvm" }
+risc0-zkvm = "0.21.0"
 
 serde = "1.0"
 
