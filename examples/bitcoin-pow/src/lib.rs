@@ -21,11 +21,6 @@ const HEADERS_HEX: [&str; 11] = [
 
 pub fn calculate_pow() -> (Receipt, ([u8; 32], [u8; 32])) {
     let mut env = ExecutorEnv::builder();
-    // for i in 0..BLOCK_HEADERS.len() {
-    //     // env.write(&BLOCK_HEADERS[i]).unwrap();
-    //     env.write(&BLOCK_HEADERS[i][0..4].try_into()).unwrap();
-    // }
-    // let env = env.build().unwrap();
 
     let headers: Vec<Header> = HEADERS_HEX
         .iter()
