@@ -3,9 +3,7 @@
 **/target/
 .env
 /work_dir/input.json
-a
 /temp/
-groth16-verifier-old
 bin/*
 obj/*
 !obj/.emptydir
