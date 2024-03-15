@@ -38,7 +38,6 @@ To compile the groth16 verifier you will need the clang and riscv32 toolchain, f
 **Note:** You can skip this step if you don't want to build the zk verifier binary. 
 
 ```
-make mcl
 make zkverifier
 ```
 
@@ -51,7 +50,6 @@ Run the BitVM simulation:
 ```
 cargo run --bin bitvm --release
 ```
-
 
 Expected output:
 ```
