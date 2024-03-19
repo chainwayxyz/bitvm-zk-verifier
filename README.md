@@ -54,12 +54,8 @@ Transpile it to the BitVM instruction set and save the program:
 npx ts-node --files rv32i-to-bitvm/main.ts bin/zkverifier
 ```
 
-Install cargo-risczero and riscv32im-risc0-zkvm-elf toolchain:
-
-```
-cargo install cargo-risczero
-cargo risczero install
-```
+You need RISC Zero tools to run simulation. You can follow the instruction in
+[RISC Zero installation documentation](https://dev.risczero.com/api/zkvm/install#install).
 
 Run the BitVM simulation:
 ```
