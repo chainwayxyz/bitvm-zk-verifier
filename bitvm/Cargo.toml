@@ -1,0 +1,10 @@
+[package]
+name = "bitvm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+risc0-groth16.workspace = true

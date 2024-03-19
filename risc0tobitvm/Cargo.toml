@@ -1,0 +1,18 @@
+[package]
+name = "risc0tobitvm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hex.workspace = true
+risc0-zkvm.workspace = true
+env_logger.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+risc0-groth16.workspace = true
+sha2.workspace = true
+hello-world.workspace = true
+bitcoin-pow.workspace = true
+num-bigint.workspace = true
+risc0-binfmt.workspace = true
+blake3.workspace = true
