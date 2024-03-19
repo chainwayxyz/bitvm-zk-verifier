@@ -46,6 +46,13 @@ Transpile it to the BitVM instruction set and save the program:
 npx ts-node --files rv32i-to-bitvm/main.ts bin/zkverifier
 ```
 
+Install cargo-risczero and riscv32im-risc0-zkvm-elf toolchain:
+
+```
+cargo install cargo-risczero
+cargo risczero install
+```
+
 Run the BitVM simulation:
 ```
 cargo run --bin bitvm --release
