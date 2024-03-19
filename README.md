@@ -32,8 +32,16 @@ yarn
 cd ..
 ```
 
+To compile the groth16 verifier you will need the clang and riscv32 toolchains.
+You can follow the instructions in https://github.com/sifive/riscv-llvm. This
+will install riscv64 targeted riscv-llvm, which also has support for riscv32
+targets.
 
-To compile the groth16 verifier you will need the clang and riscv32 toolchain, follow the instructions in https://github.com/sifive/riscv-llvm
+You need to set RISCV_GCC variable if riscv-llvm is not in PATH.
+
+```bash
+export RISCV_GCC=/path/to/riscv64-unknown-elf-gcc
+```
 
 **Note:** You can skip this step if you don't want to build the zk verifier binary. 
 
