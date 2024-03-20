@@ -1,0 +1,15 @@
+[package]
+name = "groth16"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+groth16-methods = { path = "methods" }
+risc0-zkvm = { version = "0.21.0" }
+serde = "1.0"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]

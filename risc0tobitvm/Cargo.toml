@@ -13,6 +13,7 @@ risc0-groth16.workspace = true
 sha2.workspace = true
 hello-world.workspace = true
 bitcoin-pow.workspace = true
+groth16.workspace = true
 num-bigint.workspace = true
 risc0-binfmt.workspace = true
 blake3.workspace = true
