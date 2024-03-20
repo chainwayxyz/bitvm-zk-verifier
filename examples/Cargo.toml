@@ -3,7 +3,8 @@ resolver = "2"
 members = [
   "hello-world",
   "bitcoin-pow",
-  "groth16"
+  "groth16",
+  "groth16-verifier"
 ]
 
 # Always optimize; otherwise tests take excessively long.
