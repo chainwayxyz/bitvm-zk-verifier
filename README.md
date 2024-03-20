@@ -32,22 +32,27 @@ yarn
 cd ..
 ```
 
+To compile the groth16 verifier you will need the clang and riscv32 toolchains.
+You can follow the instructions in https://github.com/sifive/riscv-llvm. This
+will install riscv64 targeted riscv-llvm, which also has support for riscv32
+targets. You also need to set RISCV_GCC variable if install path of riscv-llvm
+is not in `PATH`.
 
-To compile the groth16 verifier you will need the clang and riscv32 toolchain, follow the instructions in https://github.com/sifive/riscv-llvm
+**Note:** You can skip this step if you don't want to build the zk verifier
+binary. 
 
-**Note:** You can skip this step if you don't want to build the zk verifier binary. 
-
-```
+```bash
+export RISCV_GCC=/path/to/riscv64-unknown-elf-gcc
 make zkverifier
 ```
 
 Transpile it to the BitVM instruction set and save the program:
-```
+```bash
 npx ts-node --files rv32i-to-bitvm/main.ts bin/zkverifier
 ```
 
 Run the BitVM simulation:
-```
+```bash
 cargo run --bin bitvm --release
 ```
 
@@ -58,6 +63,10 @@ result: 1, 0
 ```
 
 ### To Generate Your Own Proof in RISC Zero:
+
+You need RISC Zero tools to generate your own proof. You can follow the
+instruction in
+[RISC Zero installation documentation](https://dev.risczero.com/api/zkvm/install#install).
 
 ```bash
 RISC0_DEV_MODE=0 cargo run --bin risc0tobitvm --release
