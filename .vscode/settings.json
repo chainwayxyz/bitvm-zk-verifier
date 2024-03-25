@@ -2,6 +2,11 @@
   "rust-analyzer.linkedProjects": [
     "./Cargo.toml",
     "./examples/bitcoin-pow/methods/guest/Cargo.toml",
-    "./examples/bitcoin-pow/Cargo.toml"
+    "./examples/bitcoin-pow/Cargo.toml",
+    "./examples/bitcoin-pow/Cargo.toml",
+    "./examples/hello-world/methods/guest/Cargo.toml",
+    "./examples/hello-world/Cargo.toml",
+    "./examples/groth16-verifier/methods/guest/Cargo.toml",
+    "./examples/groth16-verifier/Cargo.toml"
   ]
 }

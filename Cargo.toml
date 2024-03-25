@@ -12,6 +12,7 @@ risc0-groth16 = {path="risc0-groth16", features=["prove"]}
 sha2 = {version="=0.10.6", default-features = false}
 hello-world = {path="./examples/hello-world"}
 bitcoin-pow = {path="./examples/bitcoin-pow"}
+risc0-groth16-verifier = {path="./examples/groth16-verifier"}
 num-bigint = "0.4.4"
 risc0-binfmt = "0.20.1"
 blake3 = "1.5.0"
