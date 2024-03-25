@@ -7,7 +7,7 @@ edition = "2021"
 bitcoin = { version = "0.31.1", features = ["bitcoinconsensus"] }
 bitcoin-pow-methods = { path = "methods" }
 hex = "0.4.3"
-risc0-zkvm = "0.21.0"
+risc0-zkvm = "0.20.1"
 serde = "1.0"
 
 [features]
