@@ -1,0 +1,10 @@
+[package]
+name = "bitvm-transpiler"
+description = "Binary to BitVM assembly transpiler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.3", features = ["derive"] }
+elf = "0.7.4"
+file-format = "0.24.0"

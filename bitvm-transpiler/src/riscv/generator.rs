@@ -1,0 +1,584 @@
+// bitvm-transpiler - Convert other assemblies to BitVM assembly.
+// Copyright (C) 2024 Chainway Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+//! BitVM code generator for RISC-V targets
+
+use crate::bitvm;
+use crate::riscv::{Instruction, RiscvInstructions::*};
+
+/// Generates BitVM assembly using decoded RISC-V assembly.
+pub fn generate_code(instructions: Vec<Instruction>) -> Vec<bitvm::Instruction> {
+    let mut bitvm_instructions = Vec::new();
+
+    for i in instructions {
+        let instr = match i.instr {
+            ADD => add(i),
+            ADDI => addi(i),
+            _ => panic!("Illegal instruction: {:#?}", i.instr),
+        };
+
+        for j in instr {
+            bitvm_instructions.push(j);
+        }
+    }
+
+    bitvm_instructions
+}
+
+fn reg2mem(reg: u32) -> u32 {
+    reg * 4
+}
+fn tmp() -> u32 {
+    33 * 4
+}
+fn tmp2() -> u32 {
+    34 * 4
+}
+fn tmp3() -> u32 {
+    35 * 4
+}
+
+fn add(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_ADD,
+        address_a: reg2mem(instruction.rs1),
+        address_b: reg2mem(instruction.rs2),
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn addi(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_ADDI,
+        address_a: reg2mem(instruction.rs1),
+        address_b: instruction.imm,
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn sub(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_SUB,
+        address_a: reg2mem(instruction.rs1),
+        address_b: reg2mem(instruction.rs2),
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn xor(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_XOR,
+        address_a: reg2mem(instruction.rs1),
+        address_b: reg2mem(instruction.rs2),
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn xori(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_XORI,
+        address_a: reg2mem(instruction.rs1),
+        address_b: instruction.imm,
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn and(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_AND,
+        address_a: reg2mem(instruction.rs1),
+        address_b: reg2mem(instruction.rs2),
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn andi(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_ANDI,
+        address_a: reg2mem(instruction.rs1),
+        address_b: instruction.imm,
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn or(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_OR,
+        address_a: reg2mem(instruction.rs1),
+        address_b: reg2mem(instruction.rs2),
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn ori(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![bitvm::Instruction {
+        asm_type: bitvm::ASM_ORI,
+        address_a: reg2mem(instruction.rs1),
+        address_b: instruction.imm,
+        address_c: reg2mem(instruction.rd),
+    }]
+}
+
+fn jal(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(0),
+            address_b: 4,
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_BEQ,
+            address_a: reg2mem(0),
+            address_b: reg2mem(0),
+            address_c: 0,
+        },
+    ]
+}
+
+fn lbu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            // just to be sure someone didn't sneak in a uint32 value instead of a bit
+            asm_type: bitvm::ASM_ANDI,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0xFF,
+            address_c: reg2mem(instruction.rd),
+        },
+    ]
+}
+
+fn lh(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    let mut ret = vec![
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            // just to be sure someone didn't sneak in a uint32 value instead of a bit
+            asm_type: bitvm::ASM_ANDI,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0xFF,
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: tmp(),
+            address_b: 1,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: tmp2(),
+        },
+        bitvm::Instruction {
+            // just to be sure someone didn't sneak in a uint32 value instead of a byte
+            asm_type: bitvm::ASM_ANDI,
+            address_a: tmp2(),
+            address_b: 0xFF,
+            address_c: tmp2(),
+        },
+    ];
+
+    for _ in 0..8 {
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_ADD,
+            address_a: tmp2(),
+            address_b: tmp2(),
+            address_c: tmp2(),
+        });
+    }
+
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_OR,
+        address_a: reg2mem(instruction.rd),
+        address_b: tmp2(),
+        address_c: reg2mem(instruction.rd),
+    });
+
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_ANDI,
+        address_a: reg2mem(instruction.rd),
+        address_b: 0x8000,
+        address_c: tmp(),
+    });
+
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_ADD,
+        address_a: tmp(),
+        address_b: tmp(),
+        address_c: tmp(),
+    });
+
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_SUB,
+        address_a: 0,
+        address_b: tmp(),
+        address_c: tmp(),
+    });
+
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_OR,
+        address_a: reg2mem(instruction.rd),
+        address_b: tmp(),
+        address_c: reg2mem(instruction.rd),
+    });
+
+    ret
+}
+
+fn lb(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            // Load can return up to 32-bit
+            asm_type: bitvm::ASM_ANDI,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0xFF,
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ANDI,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0x80,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            // lshift
+            asm_type: bitvm::ASM_ADD,
+            address_a: tmp(),
+            address_b: tmp(),
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_SUB,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_OR,
+            address_a: reg2mem(instruction.rd),
+            address_b: tmp(),
+            address_c: reg2mem(instruction.rd),
+        },
+    ]
+}
+
+fn lhu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    let mut ret = vec![
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            // just to be sure someone didn't sneak in a uint32 value instead of a bit
+            asm_type: bitvm::ASM_ANDI,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0xFF,
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: tmp(),
+            address_b: 1,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: tmp2(),
+        },
+        bitvm::Instruction {
+            // just to be sure someone didn't sneak in a uint32 value instead of a byte
+            asm_type: bitvm::ASM_ANDI,
+            address_a: tmp2(),
+            address_b: 0xFF,
+            address_c: tmp2(),
+        },
+    ];
+
+    for _ in 0..8 {
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_ADD,
+            address_a: tmp2(),
+            address_b: tmp2(),
+            address_c: tmp2(),
+        });
+    }
+
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_OR,
+        address_a: reg2mem(instruction.rd),
+        address_b: tmp2(),
+        address_c: reg2mem(instruction.rd),
+    });
+
+    ret
+}
+
+fn lw(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    let mut ret = vec![
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm + 3,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: reg2mem(instruction.rd),
+        },
+        bitvm::Instruction {
+            // just to be sure someone didn't sneak in a uint32 value instead of a bit
+            asm_type: bitvm::ASM_ANDI,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0xFF,
+            address_c: reg2mem(instruction.rd),
+        },
+    ];
+
+    for _ in 0..8 {
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_SUBI,
+            address_a: tmp(),
+            address_b: 1,
+            address_c: tmp(),
+        });
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: tmp2(),
+        });
+        ret.push(bitvm::Instruction {
+            // just to be sure someone didn't sneak in a uint32 value instead of a bit
+            asm_type: bitvm::ASM_ANDI,
+            address_a: tmp2(),
+            address_b: 0xFF,
+            address_c: tmp2(),
+        });
+        for __ in 0..8 {
+            ret.push(bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: tmp2(),
+                address_b: tmp2(),
+                address_c: tmp2(),
+            });
+        }
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_OR,
+            address_a: reg2mem(instruction.rd),
+            address_b: tmp2(),
+            address_c: reg2mem(instruction.rd),
+        });
+    }
+
+    ret
+}
+
+fn sb(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    vec![
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ADD,
+            address_a: reg2mem(instruction.rs2),
+            address_b: 0,
+            address_c: tmp2(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_ANDI,
+            address_a: tmp2(),
+            address_b: 0xFF,
+            address_c: tmp2(),
+        },
+        bitvm::Instruction {
+            asm_type: bitvm::ASM_STORE,
+            address_a: tmp2(),
+            address_b: tmp(),
+            address_c: 0,
+        },
+    ]
+}
+
+fn sh(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    let mut ret = vec![
+        bitvm::Instruction { // tmp is now rs1 + offset which is the memroy point where we want to store rs2[0:15]
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm,
+            address_c: tmp(),
+        },
+        bitvm::Instruction { // Move rs2 to tmp2, now we want to store tmp2 to the memory location in tmp.
+            asm_type: bitvm::ASM_ADD,
+            address_a: reg2mem(instruction.rs2),
+            address_b: 0,
+            address_c: tmp2(),
+        },
+        bitvm::Instruction {
+             // we get the last 8 bit and store it in tmp2
+            asm_type: bitvm::ASM_ANDI,
+            address_a: tmp2(),
+            address_b: 0xFF,
+            address_c: tmp2(),
+        },
+        bitvm::Instruction {// Finally wrote the last byte, now we have to write rs2[9:15]
+            asm_type: bitvm::ASM_STORE,
+            address_a: tmp2(),
+            address_b: tmp(),
+            address_c: 0,
+        },
+        bitvm::Instruction { // We move 1 byte to write the second half.
+            asm_type: bitvm::ASM_ADDI,
+            address_a: tmp(),
+            address_b: 1,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+             // rs2 is the value we want to write, moved it to tmp2
+            asm_type: bitvm::ASM_ADD,
+            address_a: reg2mem(instruction.rs2),
+            address_b: 0,
+            address_c: tmp2(),
+        },
+    ];
+
+    for _ in 0..8 {
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_ADD,
+            address_a: tmp2(),
+            address_b: tmp2(),
+            address_c: tmp2(),
+        });
+    }
+
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_ANDI,
+		address_a: tmp2(),
+		address_b: 0xFF,
+		address_c: tmp2(),
+    });
+    ret.push(bitvm::Instruction {
+        asm_type: bitvm::ASM_STORE,
+		address_a: tmp2(),
+		address_b: tmp(),
+		address_c: 0,
+    });
+
+    ret
+}
+
+fn sw(instruction: Instruction) -> Vec<bitvm::Instruction> {
+    let mut ret = vec![
+        bitvm::Instruction {
+			// Calculate base address and store it in tmp() for memory access
+            asm_type: bitvm::ASM_ADDI,
+            address_a: reg2mem(instruction.rs1),
+            address_b: instruction.imm,
+            address_c: tmp(),
+        },
+        bitvm::Instruction {
+			// Temporarily store rs2 value for manipulation
+            asm_type: bitvm::ASM_ADD,
+            address_a: reg2mem(instruction.rs2),
+            address_b: 0,
+            address_c: tmp2(),
+        },
+    ];
+
+    for i in 0..4 {
+		// Isolate the current byte from tmp2() and store it
+        ret.push(bitvm::Instruction {
+			 // Use a new tmp register if necessary
+            asm_type: bitvm::ASM_ANDI,
+            address_a: tmp2(),
+            address_b: 0xFF,
+            address_c: tmp3(),
+        });
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_LOAD,
+            address_a: 0,
+            address_b: tmp(),
+            address_c: tmp2(),
+        });
+		// Prepare for the next byte unless it's the last byte
+        if i < 3 {
+            ret.push(bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: tmp2(),
+                address_b: tmp2(),
+                address_c: tmp2(),
+            });
+			ret.push(bitvm::Instruction {
+				asm_type: bitvm::ASM_OR,
+				address_a: reg2mem(instruction.rd),
+				address_b: tmp2(),
+				address_c: reg2mem(instruction.rd),
+			});
+        }
+    }
+
+    ret
+}
