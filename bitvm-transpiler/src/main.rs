@@ -37,15 +37,17 @@ fn main() {
     let input_file = cli::parse_cli();
 
     let binary = elf_parser::read_elf_file(input_file);
-    let isa = binary.isa;
+    let binary_info = elf_parser::BinaryInfo::from(binary.clone());
 
-    let decoded_binary = match isa {
+    let decoded_binary = match binary_info.isa {
         elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => riscv::decode(binary),
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 
-    let bitvm_instructions = match isa {
-        elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => riscv::generate_code(decoded_binary),
+    let bitvm_instructions = match binary_info.isa {
+        elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => {
+            riscv::generate_code(binary_info, decoded_binary)
+        }
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 

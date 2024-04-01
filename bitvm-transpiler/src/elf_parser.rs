@@ -61,6 +61,23 @@ pub enum Isa {
     Riscv64,
 }
 
+/// This struct includes summary of the input binary. It is also a subset of
+/// `InputBinary`. Therefore it is initialized using the `InputBinary` struct.
+#[derive(Clone, Copy)]
+pub struct BinaryInfo {
+    pub isa: Isa,
+    pub pc: u64,
+}
+
+impl BinaryInfo {
+    pub fn from(input_binary: InputBinary) -> Self {
+        Self {
+            isa: input_binary.isa,
+            pc: input_binary.code_addr,
+        }
+    }
+}
+
 /// Reads file and section headers. Returns ELF target machine information and
 /// actual code.
 pub fn read_elf_file(input_file: PathBuf) -> InputBinary {

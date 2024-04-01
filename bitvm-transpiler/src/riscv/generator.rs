@@ -14,9 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//! BitVM code generator for RISC-V targets
+//! BitVM code generator for RISC-V targets. Most of the RISC-V instructions are
+//! not present in BitVM. So, we need to simulate them with instructions that
+//! are present in BitVM.
 
 use crate::bitvm;
+use crate::elf_parser::BinaryInfo;
 use crate::riscv::{Instruction, RiscvInstructions::*};
 
 fn reg2mem(reg: u32) -> u32 {
@@ -33,56 +36,61 @@ fn tmp3() -> u32 {
 }
 
 /// Generates BitVM assembly using decoded RISC-V assembly.
-pub fn generate_code(instructions: Vec<Instruction>) -> Vec<bitvm::Instruction> {
+pub fn generate_code(
+    mut info: BinaryInfo,
+    instructions: Vec<Instruction>,
+) -> Vec<bitvm::Instruction> {
     let mut bitvm_instructions = Vec::new();
 
     for i in instructions {
         let instr = match i.instr {
-            ADD => add(i),
-            ADDI => addi(i),
-            SUB => sub(i),
-            XOR => xor(i),
-            XORI => xori(i),
-            AND => and(i),
-            ANDI => andi(i),
-            OR => or(i),
-            ORI => ori(i),
-            JAL => jal(i),
-            LBU => lbu(i),
-            LH => lh(i),
-            LB => lb(i),
-            LHU => lhu(i),
-            LW => lw(i),
-            SB => sb(i),
-            SH => sh(i),
-            SW => sw(i),
-            JALR => jalr(i),
-            AUIPC => auipc(i),
-            LUI => lui(i),
-            BEQ => beq(i),
-            BNE => bne(i),
-            SLLI => slli(i),
-            SRLI => srli(i),
-            SRAI => srai(i),
-            SLT => slt(i),
-            SLTU => sltu(i),
-            SLTIU => sltiu(i),
-            SLTI => slti(i),
-            BLT => blt(i),
-            BLTU => bltu(i),
-            BGE => bge(i),
-            BGEU => bgeu(i),
-            ECALL => ecall(i),
-            EBREAK => ebreak(i),
-            SRA => sra(i),
-            SRL => srl(i),
-            SLL => sll(i),
+            ADD => add(i, info),
+            ADDI => addi(i, info),
+            SUB => sub(i, info),
+            XOR => xor(i, info),
+            XORI => xori(i, info),
+            AND => and(i, info),
+            ANDI => andi(i, info),
+            OR => or(i, info),
+            ORI => ori(i, info),
+            JAL => jal(i, info),
+            LBU => lbu(i, info),
+            LH => lh(i, info),
+            LB => lb(i, info),
+            LHU => lhu(i, info),
+            LW => lw(i, info),
+            SB => sb(i, info),
+            SH => sh(i, info),
+            SW => sw(i, info),
+            JALR => jalr(i, info),
+            AUIPC => auipc(i, info),
+            LUI => lui(i, info),
+            BEQ => beq(i, info),
+            BNE => bne(i, info),
+            SLLI => slli(i, info),
+            SRLI => srli(i, info),
+            SRAI => srai(i, info),
+            SLT => slt(i, info),
+            SLTU => sltu(i, info),
+            SLTIU => sltiu(i, info),
+            SLTI => slti(i, info),
+            BLT => blt(i, info),
+            BLTU => bltu(i, info),
+            BGE => bge(i, info),
+            BGEU => bgeu(i, info),
+            ECALL => ecall(i, info),
+            EBREAK => ebreak(i, info),
+            SRA => sra(i, info),
+            SRL => srl(i, info),
+            SLL => sll(i, info),
             _ => panic!("Illegal instruction: {:#?}", i.instr),
         };
 
         for j in instr {
             bitvm_instructions.push(j);
         }
+
+        info.pc += 1;
     }
 
     bitvm_instructions
@@ -94,7 +102,7 @@ fn test_generate_code() {
     // Single add instruction.
     let input = vec![input_instr];
     assert_eq!(
-        generate_code(input),
+        generate_code(tests::INFO, input),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ADD,
             address_a: reg2mem(1),
@@ -105,7 +113,7 @@ fn test_generate_code() {
 
     let input = vec![input_instr, input_instr];
     assert_eq!(
-        generate_code(input),
+        generate_code(tests::INFO, input),
         vec![
             bitvm::Instruction {
                 asm_type: bitvm::ASM_ADD,
@@ -133,7 +141,7 @@ fn test_generate_code() {
         },
     ];
     assert_eq!(
-        generate_code(input),
+        generate_code(tests::INFO, input),
         vec![
             bitvm::Instruction {
                 asm_type: bitvm::ASM_ADD,
@@ -168,7 +176,7 @@ fn test_generate_code() {
         },
     ];
     assert_eq!(
-        generate_code(input),
+        generate_code(tests::INFO, input),
         vec![
             bitvm::Instruction {
                 asm_type: bitvm::ASM_ADD,
@@ -207,10 +215,10 @@ fn test_generate_code() {
             address_c: reg2mem(3),
         });
     }
-    assert_eq!(generate_code(input), expected);
+    assert_eq!(generate_code(tests::INFO, input), expected);
 }
 
-fn add(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn add(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ADD,
         address_a: reg2mem(instruction.rs1),
@@ -223,7 +231,7 @@ fn test_add() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        add(input),
+        add(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ADD,
             address_a: reg2mem(1),
@@ -234,7 +242,7 @@ fn test_add() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        add(input),
+        add(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ADD,
             address_a: reg2mem(0),
@@ -244,7 +252,7 @@ fn test_add() {
     );
 }
 
-fn addi(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn addi(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ADDI,
         address_a: reg2mem(instruction.rs1),
@@ -257,7 +265,7 @@ fn test_addi() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        addi(input),
+        addi(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(1),
@@ -268,7 +276,7 @@ fn test_addi() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        addi(input),
+        addi(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
@@ -278,7 +286,7 @@ fn test_addi() {
     );
 }
 
-fn sub(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sub(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_SUB,
         address_a: reg2mem(instruction.rs1),
@@ -291,7 +299,7 @@ fn test_sub() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        sub(input),
+        sub(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_SUB,
             address_a: reg2mem(1),
@@ -302,7 +310,7 @@ fn test_sub() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        sub(input),
+        sub(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_SUB,
             address_a: reg2mem(0),
@@ -312,8 +320,7 @@ fn test_sub() {
     );
 }
 
-
-fn xor(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn xor(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_XOR,
         address_a: reg2mem(instruction.rs1),
@@ -326,7 +333,7 @@ fn test_xor() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        xor(input),
+        xor(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_XOR,
             address_a: reg2mem(1),
@@ -337,7 +344,7 @@ fn test_xor() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        xor(input),
+        xor(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_XOR,
             address_a: reg2mem(0),
@@ -347,7 +354,7 @@ fn test_xor() {
     );
 }
 
-fn xori(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn xori(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_XORI,
         address_a: reg2mem(instruction.rs1),
@@ -360,7 +367,7 @@ fn test_xori() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        xori(input),
+        xori(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_XORI,
             address_a: reg2mem(1),
@@ -371,7 +378,7 @@ fn test_xori() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        xori(input),
+        xori(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_XORI,
             address_a: reg2mem(0),
@@ -381,7 +388,7 @@ fn test_xori() {
     );
 }
 
-fn and(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn and(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_AND,
         address_a: reg2mem(instruction.rs1),
@@ -394,7 +401,7 @@ fn test_and() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        and(input),
+        and(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_AND,
             address_a: reg2mem(1),
@@ -405,7 +412,7 @@ fn test_and() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        and(input),
+        and(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_AND,
             address_a: reg2mem(0),
@@ -415,7 +422,7 @@ fn test_and() {
     );
 }
 
-fn andi(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn andi(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ANDI,
         address_a: reg2mem(instruction.rs1),
@@ -428,7 +435,7 @@ fn test_andi() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        andi(input),
+        andi(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ANDI,
             address_a: reg2mem(1),
@@ -439,7 +446,7 @@ fn test_andi() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        andi(input),
+        andi(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ANDI,
             address_a: reg2mem(0),
@@ -449,7 +456,7 @@ fn test_andi() {
     );
 }
 
-fn or(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn or(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_OR,
         address_a: reg2mem(instruction.rs1),
@@ -462,7 +469,7 @@ fn test_or() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        or(input),
+        or(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_OR,
             address_a: reg2mem(1),
@@ -473,7 +480,7 @@ fn test_or() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        or(input),
+        or(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_OR,
             address_a: reg2mem(0),
@@ -483,7 +490,7 @@ fn test_or() {
     );
 }
 
-fn ori(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn ori(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ORI,
         address_a: reg2mem(instruction.rs1),
@@ -496,7 +503,7 @@ fn test_ori() {
     let mut input = tests::INPUT;
 
     assert_eq!(
-        ori(input),
+        ori(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ORI,
             address_a: reg2mem(1),
@@ -507,7 +514,7 @@ fn test_ori() {
 
     tests::make_it_zero(&mut input);
     assert_eq!(
-        ori(input),
+        ori(input, tests::INFO),
         vec![bitvm::Instruction {
             asm_type: bitvm::ASM_ORI,
             address_a: reg2mem(0),
@@ -517,12 +524,14 @@ fn test_ori() {
     );
 }
 
-fn jal(instruction: Instruction) -> Vec<bitvm::Instruction> {
+/// Jump and link instruction in RISC-V makes unconditional jumps.
+/// 1. Add program counter
+fn jal(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
-            address_b: 4,
+            address_b: info.pc as u32 + 4,
             address_c: reg2mem(instruction.rd),
         },
         bitvm::Instruction {
@@ -534,7 +543,7 @@ fn jal(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn lbu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn lbu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -558,7 +567,7 @@ fn lbu(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn lh(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn lh(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -647,7 +656,7 @@ fn lh(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn lb(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn lb(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -696,7 +705,7 @@ fn lb(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn lhu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn lhu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -757,7 +766,7 @@ fn lhu(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn lw(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn lw(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -819,7 +828,7 @@ fn lw(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn sb(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sb(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -848,7 +857,7 @@ fn sb(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn sh(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sh(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![
         bitvm::Instruction {
             // tmp is now rs1 + offset which is the memroy point where we want to store rs2[0:15]
@@ -919,7 +928,7 @@ fn sh(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn sw(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sw(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![
         bitvm::Instruction {
             // Calculate base address and store it in tmp() for memory access
@@ -974,7 +983,7 @@ fn sw(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn jalr(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn jalr(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -1015,7 +1024,7 @@ fn jalr(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn auipc(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn auipc(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         // imm is already << 12'ed
         asm_type: bitvm::ASM_ADDI,
@@ -1025,7 +1034,7 @@ fn auipc(instruction: Instruction) -> Vec<bitvm::Instruction> {
     }]
 }
 
-fn lui(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn lui(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ADDI,
         address_a: reg2mem(0),
@@ -1034,7 +1043,7 @@ fn lui(instruction: Instruction) -> Vec<bitvm::Instruction> {
     }]
 }
 
-fn beq(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn beq(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_BEQ,
         address_a: reg2mem(instruction.rs1),
@@ -1043,7 +1052,7 @@ fn beq(instruction: Instruction) -> Vec<bitvm::Instruction> {
     }]
 }
 
-fn bne(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn bne(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_BNE,
         address_a: reg2mem(instruction.rs1),
@@ -1052,7 +1061,7 @@ fn bne(instruction: Instruction) -> Vec<bitvm::Instruction> {
     }]
 }
 
-fn slli(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn slli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![bitvm::Instruction {
         asm_type: bitvm::ASM_BNE,
         address_a: reg2mem(instruction.rs1),
@@ -1083,7 +1092,7 @@ fn slli(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn srli(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn srli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ADDI,
         address_a: reg2mem(instruction.rs1),
@@ -1114,7 +1123,7 @@ fn srli(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn srai(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn srai(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ADDI,
         address_a: reg2mem(instruction.rs1),
@@ -1148,7 +1157,7 @@ fn srai(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn slt(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn slt(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_SLT,
         address_a: reg2mem(instruction.rs1),
@@ -1157,7 +1166,7 @@ fn slt(instruction: Instruction) -> Vec<bitvm::Instruction> {
     }]
 }
 
-fn sltu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sltu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_SLTU,
         address_a: reg2mem(instruction.rs1),
@@ -1166,7 +1175,7 @@ fn sltu(instruction: Instruction) -> Vec<bitvm::Instruction> {
     }]
 }
 
-fn sltiu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sltiu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -1183,7 +1192,7 @@ fn sltiu(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn slti(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn slti(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -1200,7 +1209,7 @@ fn slti(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn blt(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn blt(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_SLT,
@@ -1217,7 +1226,7 @@ fn blt(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn bltu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn bltu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_SLTU,
@@ -1234,7 +1243,7 @@ fn bltu(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn bge(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn bge(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_SLTU,
@@ -1251,7 +1260,7 @@ fn bge(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn bgeu(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn bgeu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_SLTU,
@@ -1268,7 +1277,7 @@ fn bgeu(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn ecall(_instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn ecall(_instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -1285,7 +1294,7 @@ fn ecall(_instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn ebreak(_instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn ebreak(_instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -1302,7 +1311,7 @@ fn ebreak(_instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn sra(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sra(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             // result
@@ -1382,7 +1391,7 @@ fn sra(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn srl(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn srl(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             // result
@@ -1450,7 +1459,7 @@ fn srl(instruction: Instruction) -> Vec<bitvm::Instruction> {
     ]
 }
 
-fn sll(instruction: Instruction) -> Vec<bitvm::Instruction> {
+fn sll(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
             // result
@@ -1522,6 +1531,7 @@ fn sll(instruction: Instruction) -> Vec<bitvm::Instruction> {
 mod tests {
     #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
     use super::*;
+    use crate::elf_parser::Isa;
     use crate::riscv::{Instruction, RiscvInstructions::*};
     use crate::{bitvm, riscv};
 
@@ -1532,6 +1542,11 @@ mod tests {
         rs2: 2,
         rd: 3,
         imm: 4,
+    };
+
+    pub const INFO: BinaryInfo = BinaryInfo {
+        isa: Isa::Riscv32,
+        pc: 0,
     };
 
     /// Update input instruction's values.
