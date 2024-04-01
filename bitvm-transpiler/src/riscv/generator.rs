@@ -606,7 +606,7 @@ fn sw(instruction: Instruction) -> Vec<bitvm::Instruction> {
         });
         // Prepare for the next byte unless it's the last byte
         if i < 3 {
-            for _ in 0.. {
+            for _ in 0..8 {
                 ret.push(bitvm::Instruction {
                     asm_type: bitvm::ASM_RSHIFT1,
                     address_a: tmp2(),
