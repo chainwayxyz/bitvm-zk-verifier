@@ -19,7 +19,7 @@
 
 pub const ASM_ADD: u8 = 1;
 pub const ASM_SUB: u8 = 2;
-pub const ASM_MUL: u8 = 3;
+pub const _ASM_MUL: u8 = 3;
 pub const ASM_AND: u8 = 4;
 pub const ASM_OR: u8 = 5;
 pub const ASM_XOR: u8 = 6;
@@ -34,7 +34,7 @@ pub const ASM_BNE: u8 = 14;
 pub const ASM_RSHIFT1: u8 = 15;
 pub const ASM_SLTU: u8 = 16;
 pub const ASM_SLT: u8 = 17;
-pub const ASM_SYSCALL: u8 = 18;
+pub const _ASM_SYSCALL: u8 = 18;
 pub const ASM_LOAD: u8 = 19;
 pub const ASM_STORE: u8 = 20;
 
