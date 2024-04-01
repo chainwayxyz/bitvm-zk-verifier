@@ -1174,8 +1174,8 @@ fn sll(instruction: Instruction) -> Vec<bitvm::Instruction> {
 mod tests {
     #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
     use super::*;
-    use crate::bitvm;
     use crate::riscv::{Instruction, RiscvInstructions::*};
+    use crate::{bitvm, riscv};
 
     // For most of the instructions, this is a good default.
     const INPUT: Instruction = Instruction {
@@ -1197,6 +1197,129 @@ mod tests {
     /// Convert input instruction values to zero.
     fn make_it_zero(instr: &mut Instruction) {
         update_instruction(instr, 0, 0, 0, 0);
+    }
+
+    #[test]
+    fn test_generate_code() {
+        let input_instr = INPUT;
+
+        // Single add instruction.
+        let input = vec![input_instr];
+        assert_eq!(
+            generate_code(input),
+            vec![bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3)
+            }]
+        );
+
+        let input = vec![input_instr, input_instr];
+        assert_eq!(
+            generate_code(input),
+            vec![
+                bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADD,
+                    address_a: reg2mem(1),
+                    address_b: reg2mem(2),
+                    address_c: reg2mem(3)
+                },
+                bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADD,
+                    address_a: reg2mem(1),
+                    address_b: reg2mem(2),
+                    address_c: reg2mem(3)
+                }
+            ]
+        );
+
+        let input = vec![
+            input_instr,
+            Instruction {
+                instr: ADDI,
+                rs1: 1,
+                rs2: 2,
+                rd: 3,
+                imm: 4,
+            },
+        ];
+        assert_eq!(
+            generate_code(input),
+            vec![
+                bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADD,
+                    address_a: reg2mem(1),
+                    address_b: reg2mem(2),
+                    address_c: reg2mem(3)
+                },
+                bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADDI,
+                    address_a: reg2mem(1),
+                    address_b: 4,
+                    address_c: reg2mem(3)
+                }
+            ]
+        );
+
+        let input = vec![
+            input_instr,
+            Instruction {
+                instr: ADDI,
+                rs1: 1,
+                rs2: 2,
+                rd: 3,
+                imm: 4,
+            },
+            Instruction {
+                instr: SUB,
+                rs1: 1,
+                rs2: 2,
+                rd: 3,
+                imm: 4,
+            },
+        ];
+        assert_eq!(
+            generate_code(input),
+            vec![
+                bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADD,
+                    address_a: reg2mem(1),
+                    address_b: reg2mem(2),
+                    address_c: reg2mem(3)
+                },
+                bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADDI,
+                    address_a: reg2mem(1),
+                    address_b: 4,
+                    address_c: reg2mem(3)
+                },
+                bitvm::Instruction {
+                    asm_type: bitvm::ASM_SUB,
+                    address_a: reg2mem(1),
+                    address_b: reg2mem(2),
+                    address_c: reg2mem(3)
+                }
+            ]
+        );
+
+        // Test whether big number of instructions are a problem or not.
+        // WARNING: This will take a long time to finish and use so much memory.
+        let mut input: Vec<Instruction> = Vec::new();
+        let mut expected: Vec<bitvm::Instruction> = Vec::new();
+        let count = 5_000_000;
+        for _ in 0..count {
+            input.push(input_instr);
+        }
+        for _ in 0..count {
+            expected.push(bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3),
+            });
+        }
+        assert_eq!(generate_code(input), expected);
     }
 
     #[test]
