@@ -1169,3 +1169,87 @@ fn sll(instruction: Instruction) -> Vec<bitvm::Instruction> {
         },
     ]
 }
+
+#[cfg(test)]
+mod tests {
+    #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+    use super::*;
+    use crate::bitvm;
+    use crate::riscv::{Instruction, RiscvInstructions::*};
+
+    // For most of the instructions, this is a good default.
+    const INPUT: Instruction = Instruction {
+        instr: ADD,
+        rs1: 1,
+        rs2: 2,
+        rd: 3,
+        imm: 4,
+    };
+
+    /// Update input instruction's values.
+    fn update_instruction(instr: &mut Instruction, rs1: u32, rs2: u32, rd: u32, imm: u32) {
+        instr.rs1 = rs1;
+        instr.rs2 = rs2;
+        instr.rd = rd;
+        instr.imm = imm;
+    }
+
+    /// Convert input instruction values to zero.
+    fn make_it_zero(instr: &mut Instruction) {
+        update_instruction(instr, 0, 0, 0, 0);
+    }
+
+    #[test]
+    fn test_add() {
+        let mut input = INPUT;
+        input.instr = ADD;
+
+        assert_eq!(
+            add(input),
+            vec![bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3)
+            }]
+        );
+
+        make_it_zero(&mut input);
+        assert_eq!(
+            add(input),
+            vec![bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: reg2mem(0)
+            }]
+        );
+    }
+
+    #[test]
+    fn test_addi() {
+        let mut input = INPUT;
+        input.instr = ADDI;
+
+        assert_eq!(
+            addi(input),
+            vec![bitvm::Instruction {
+                asm_type: bitvm::ASM_ADDI,
+                address_a: reg2mem(1),
+                address_b: 4,
+                address_c: reg2mem(3)
+            }]
+        );
+
+        make_it_zero(&mut input);
+        assert_eq!(
+            addi(input),
+            vec![bitvm::Instruction {
+                asm_type: bitvm::ASM_ADDI,
+                address_a: reg2mem(0),
+                address_b: 0,
+                address_c: reg2mem(0)
+            }]
+        );
+    }
+}

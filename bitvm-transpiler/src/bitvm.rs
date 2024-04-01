@@ -38,7 +38,7 @@ pub const _ASM_SYSCALL: u8 = 18;
 pub const ASM_LOAD: u8 = 19;
 pub const ASM_STORE: u8 = 20;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Instruction {
     pub asm_type: u8,
     pub address_a: u32,

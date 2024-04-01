@@ -32,7 +32,7 @@ pub use decoder::decode;
 pub use generator::generate_code;
 
 /// A decoded RISC-V instruction, ready for the use of RISC-V BitVM assembler.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Instruction {
     pub instr: RiscvInstructions,
     pub rs1: u32,
@@ -43,7 +43,7 @@ pub struct Instruction {
 
 /// Instruction list for RISC-V targets.
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum RiscvInstructions {
     NONE,
     // RV32I/RV64I
