@@ -30,6 +30,7 @@
 mod bitvm;
 mod cli;
 mod elf_parser;
+mod output;
 mod riscv;
 
 fn main() {
@@ -43,8 +44,10 @@ fn main() {
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 
-    match isa {
+    let bitvm_instructions = match isa {
         elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => riscv::generate_code(decoded_binary),
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
+
+    output::generate_json("bitvm", bitvm_instructions)
 }

@@ -17,6 +17,8 @@
 //! BitVM machine description. Parsers must target these descriptions. Most of
 //! the stuff here are copied from the official BitVM implementation.
 
+use serde::{Deserialize, Serialize};
+
 pub const ASM_ADD: u8 = 1;
 pub const ASM_SUB: u8 = 2;
 pub const _ASM_MUL: u8 = 3;
@@ -38,7 +40,7 @@ pub const _ASM_SYSCALL: u8 = 18;
 pub const ASM_LOAD: u8 = 19;
 pub const ASM_STORE: u8 = 20;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Instruction {
     pub asm_type: u8,
     pub address_a: u32,
