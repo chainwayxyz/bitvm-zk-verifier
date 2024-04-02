@@ -14,9 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+//! # RISC-V Code Generator
+//! 
 //! BitVM code generator for RISC-V targets. Most of the RISC-V instructions are
 //! not present in BitVM. So, we need to simulate them with instructions that
 //! are present in BitVM.
+//! 
+//! ## Memory Layout
+//! 
+//! * XLEN = 4 if 32-bit else 8
+//! * x0 = 0
+//! * x1..x32 = 1*XLEN..32*XLEN
+//! * First 3*XLEN bytes after registers are used for temporary storage
 
 use crate::bitvm;
 use crate::elf_parser::BinaryInfo;

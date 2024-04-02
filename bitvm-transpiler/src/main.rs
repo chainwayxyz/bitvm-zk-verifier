@@ -38,6 +38,7 @@ fn main() {
 
     let binary = elf_parser::read_elf_file(input_file);
     let binary_info = elf_parser::BinaryInfo::from(binary.clone());
+    let data = binary.data_page.clone();
 
     let decoded_binary = match binary_info.isa {
         elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => riscv::decode(binary),
@@ -51,5 +52,5 @@ fn main() {
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 
-    output::generate_json("bitvm", bitvm_instructions)
+    output::generate_json("bitvm", bitvm_instructions, data);
 }
