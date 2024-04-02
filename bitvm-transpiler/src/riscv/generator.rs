@@ -524,8 +524,6 @@ fn test_ori() {
     );
 }
 
-/// Jump and link instruction in RISC-V makes unconditional jumps.
-/// 1. Add program counter
 fn jal(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
@@ -983,7 +981,7 @@ fn sw(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     ret
 }
 
-fn jalr(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
+fn jalr(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
@@ -1009,7 +1007,7 @@ fn jalr(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
         ret.push(bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
-            address_b: 4,
+            address_b: info.pc as u32 + 4,
             address_c: reg2mem(instruction.rd),
         });
     }
@@ -1024,51 +1022,60 @@ fn jalr(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
     ret
 }
 
-fn auipc(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
+fn auipc(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         // imm is already << 12'ed
         asm_type: bitvm::ASM_ADDI,
         address_a: reg2mem(0),
-        address_b: instruction.imm & 0xFFFFFFFF,
+        address_b: (instruction.imm + info.pc as u32) & 0xFFFFFFFF,
         address_c: reg2mem(instruction.rd),
     }]
 }
 
+/// ISA data-sheet: LUI places the U-immediate value in the top 20 bits of the
+/// destination register rd, filling in the lowest 12 bits with zeros.
+/// 
+/// This is provided by decoder as the immediate value.
 fn lui(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_ADDI,
         address_a: reg2mem(0),
-        address_b: (0b0110111 & 0xfffff000) >> 0, // 0110111: lui opcode
+        address_b: instruction.imm,
         address_c: reg2mem(instruction.rd),
     }]
 }
 
-fn beq(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
+/// BitVM compares address_a and address_b for BEQ. If equal, changes PC to
+/// address_c. Therefore we add immediate value and RISC-V PC for the address_c.
+fn beq(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_BEQ,
         address_a: reg2mem(instruction.rs1),
         address_b: reg2mem(instruction.rs2),
-        address_c: 0,
+        address_c: info.pc as u32 + instruction.imm,
     }]
 }
 
-fn bne(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
+/// BNE works same way as the BEQ.
+fn bne(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {
         asm_type: bitvm::ASM_BNE,
         address_a: reg2mem(instruction.rs1),
         address_b: reg2mem(instruction.rs2),
-        address_c: 0,
+        address_c: info.pc as u32 + instruction.imm,
     }]
 }
 
 fn slli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     let mut ret = vec![bitvm::Instruction {
-        asm_type: bitvm::ASM_BNE,
+        asm_type: bitvm::ASM_ADDI,
         address_a: reg2mem(instruction.rs1),
-        address_b: reg2mem(instruction.rs2),
-        address_c: 0,
+        address_b: 0,
+        address_c: reg2mem(instruction.rd),
     }];
 
+    // Calculate the number of times to apply ASM_LSHIFT8 based on the immediate
+    // value.
     for _ in 0..(instruction.imm / 8) {
         for __ in 0..8 {
             ret.push(bitvm::Instruction {
@@ -1080,6 +1087,7 @@ fn slli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
         }
     }
 
+    // Calculate any remaining shifts that are less than 8 bits.
     for _ in 0..(instruction.imm % 8) {
         ret.push(bitvm::Instruction {
             asm_type: bitvm::ASM_ADD,
@@ -1100,6 +1108,8 @@ fn srli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
         address_c: reg2mem(instruction.rd),
     }];
 
+    // Calculate the number of times to apply ASM_RSHIFT8 based on the immediate
+    // value.
     for _ in 0..(instruction.imm / 8) {
         for __ in 0..8 {
             ret.push(bitvm::Instruction {
@@ -1111,6 +1121,7 @@ fn srli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
         }
     }
 
+    // Calculate any remaining shifts that are less than 8 bits.
     for _ in 0..(instruction.imm % 8) {
         ret.push(bitvm::Instruction {
             asm_type: bitvm::ASM_RSHIFT1,
@@ -1280,12 +1291,14 @@ fn bgeu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
 fn ecall(_instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
+            // tmp() acts as our status buffer: 0 = unknown 1 = OK, 2 = not OK
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
             address_b: 1,
             address_c: tmp(),
         },
         bitvm::Instruction {
+            // if x10 / a0 is 0, finish program
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(10),
             address_b: reg2mem(0),
