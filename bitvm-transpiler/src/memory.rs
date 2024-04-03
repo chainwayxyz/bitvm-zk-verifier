@@ -28,8 +28,17 @@
 
 use crate::elf_parser::InputBinary;
 
-pub fn organize(binary: InputBinary) -> Vec<u8> {
-	let memory: Vec<u8> = Vec::new();
+/// Memory size of the BitVM virtual machine in bytes.
+pub const MEMSIZE: usize = 1024 * 1024 * 16;
 
-	memory
+pub fn organize(binary: InputBinary) -> Vec<u8> {
+    let mut memory: Vec<u8> = vec![0; MEMSIZE];
+
+    for i in 0..binary.data_page.len() {
+        for j in 0..binary.data_page[i].len() {
+            memory.insert(binary.data_addr[i] as usize + j, binary.data_page[i][j]);
+        }
+    }
+
+    memory
 }

@@ -25,7 +25,11 @@ pub fn generate_json(file_name: &str, input: Vec<Instruction>, memory: Vec<u8>) 
     let memory_serialized = serde_json::to_string_pretty(&memory).unwrap();
 
     let mut file = File::create(format!("{}.json", file_name)).unwrap();
-    let out = String::from("{\n  \"program\": ") + serialized.as_str() + ",\n  \"memory_entries\": " + memory_serialized.as_str() + "\n}";
+    let out = String::from("{\n  \"program\": ")
+        + serialized.as_str()
+        + ",\n  \"memory_entries\": "
+        + memory_serialized.as_str()
+        + "\n}";
 
     file.write_all(out.as_bytes()).unwrap();
 }

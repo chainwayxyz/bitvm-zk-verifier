@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //! # RISC-V Code Generator
-//! 
+//!
 //! BitVM code generator for RISC-V targets. Most of the RISC-V instructions are
 //! not present in BitVM. So, we need to simulate them with instructions that
 //! are present in BitVM.
-//! 
+//!
 //! ## Memory Layout
-//! 
+//!
 //! * XLEN = 4 if 32-bit else 8
 //! * x0 = 0
 //! * x1..x32 = 1*XLEN..32*XLEN
@@ -1043,7 +1043,7 @@ fn auipc(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> 
 
 /// ISA data-sheet: LUI places the U-immediate value in the top 20 bits of the
 /// destination register rd, filling in the lowest 12 bits with zeros.
-/// 
+///
 /// This is provided by decoder as the immediate value.
 fn lui(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![bitvm::Instruction {

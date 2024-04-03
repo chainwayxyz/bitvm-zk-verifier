@@ -126,10 +126,11 @@ where
     let shdr = file.section_headers().clone();
 
     for hdr in shdr {
-        if hdr.sh_addr != binary.code_addr
-           && hdr.sh_type == 1 && hdr.sh_addr != 0 {
+        if hdr.sh_addr != binary.code_addr && hdr.sh_type == 1 && hdr.sh_addr != 0 {
             binary.data_addr.push(hdr.sh_addr);
-            binary.data_page.push(file.section_data(&hdr).unwrap().0.to_vec());
+            binary
+                .data_page
+                .push(file.section_data(&hdr).unwrap().0.to_vec());
         }
     }
 }

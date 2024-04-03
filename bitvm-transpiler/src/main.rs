@@ -53,7 +53,7 @@ fn main() {
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 
-    let out = memory::organize(binary);
+    let memory = memory::organize(binary);
 
-    output::generate_json("bitvm", bitvm_instructions, out);
+    output::generate_json("bitvm", bitvm_instructions, memory);
 }
