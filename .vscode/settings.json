@@ -2,6 +2,7 @@
   "rust-analyzer.linkedProjects": [
     "./Cargo.toml",
     "./examples/bitcoin-pow/methods/guest/Cargo.toml",
-    "./examples/bitcoin-pow/Cargo.toml"
+    "./examples/bitcoin-pow/Cargo.toml",
+    "./bitvm-transpiler/Cargo.toml"
   ]
 }

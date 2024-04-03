@@ -25,11 +25,13 @@
 //! 2. Read input binary file and get instructions
 //! 3. Run ISA specific decoder
 //! 4. Run ISA specific BitVM assembler
-//! 5. Write BitVM assembly to a file
+//! 5. Organize memory
+//! 6. Write BitVM assembly and memory to a file
 
 mod bitvm;
 mod cli;
 mod elf_parser;
+mod memory;
 mod output;
 mod riscv;
 
@@ -38,10 +40,9 @@ fn main() {
 
     let binary = elf_parser::read_elf_file(input_file);
     let binary_info = elf_parser::BinaryInfo::from(binary.clone());
-    let data = binary.data_page.clone();
 
     let decoded_binary = match binary_info.isa {
-        elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => riscv::decode(binary),
+        elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => riscv::decode(binary.clone()),
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 
@@ -52,5 +53,7 @@ fn main() {
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 
-    output::generate_json("bitvm", bitvm_instructions, data);
+    let out = memory::organize(binary);
+
+    output::generate_json("bitvm", bitvm_instructions, out);
 }

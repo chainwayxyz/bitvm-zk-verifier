@@ -32,13 +32,13 @@ use elf::ElfStream;
 use std::path::PathBuf;
 
 /// Parsed binary file content, which is ready for transpiling.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InputBinary {
     pub isa: Isa,
     pub code_page: Vec<u8>,
     pub code_addr: u64,
-    pub data_page: Vec<u8>,
-    pub data_addr: u64,
+    pub data_page: Vec<Vec<u8>>,
+    pub data_addr: Vec<u64>,
 }
 
 impl InputBinary {
@@ -48,13 +48,13 @@ impl InputBinary {
             code_page: vec![],
             code_addr: 0,
             data_page: vec![],
-            data_addr: 0,
+            data_addr: vec![],
         }
     }
 }
 
 /// Supported ISA's.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Isa {
     None,
     Riscv32,
@@ -87,14 +87,6 @@ pub fn read_elf_file(input_file: PathBuf) -> InputBinary {
     let mut file =
         ElfStream::<AnyEndian, _>::open_stream(io).expect("Could not open ELF file as a stream.");
 
-    let text_section = get_a_section(&mut file, ".text");
-    binary.code_page = text_section.0.to_vec();
-    binary.code_addr = text_section.1;
-
-    let data_section = get_a_section(&mut file, ".data");
-    binary.data_page = data_section.0.to_vec();
-    binary.data_addr = data_section.1;
-
     binary.isa = match file.ehdr.e_machine {
         0xF3 => match file.ehdr.class {
             Class::ELF32 => Isa::Riscv32,
@@ -102,6 +94,12 @@ pub fn read_elf_file(input_file: PathBuf) -> InputBinary {
         },
         _ => panic!("Unsupported ISA!"),
     };
+
+    let text_section = get_a_section(&mut file, ".text");
+    binary.code_page = text_section.0.to_vec();
+    binary.code_addr = text_section.1;
+
+    get_data_sections(&mut file, &mut binary);
 
     binary
 }
@@ -113,8 +111,25 @@ where
 {
     let shdr: SectionHeader = *file
         .section_header_by_name(section)
-        .expect("section table should be parseable")
+        .expect("section table should be parsable")
         .expect(format!("file should have a {} section", section).as_str());
 
-    (file.section_data(&shdr).unwrap().0, shdr.sh_offset)
+    (file.section_data(&shdr).unwrap().0, shdr.sh_addr)
+}
+
+/// Gets multiple loadable data sections.
+fn get_data_sections<'a, T>(file: &'a mut ElfStream<AnyEndian, T>, binary: &mut InputBinary)
+where
+    T: std::io::Read + std::io::Seek,
+{
+    // Get both actual section data and section name table.
+    let shdr = file.section_headers().clone();
+
+    for hdr in shdr {
+        if hdr.sh_addr != binary.code_addr
+           && hdr.sh_type == 1 && hdr.sh_addr != 0 {
+            binary.data_addr.push(hdr.sh_addr);
+            binary.data_page.push(file.section_data(&hdr).unwrap().0.to_vec());
+        }
+    }
 }
