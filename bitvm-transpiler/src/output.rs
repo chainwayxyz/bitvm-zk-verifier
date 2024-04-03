@@ -21,8 +21,8 @@ use std::fs::File;
 use std::io::prelude::*;
 
 pub fn generate_json(file_name: &str, input: Vec<Instruction>, memory: Vec<u8>) {
-    let serialized = serde_json::to_string_pretty(&input).unwrap();
-    let memory_serialized = serde_json::to_string_pretty(&memory).unwrap();
+    let serialized = serde_json::to_string(&input).unwrap();
+    let memory_serialized = serde_json::to_string(&memory).unwrap();
 
     let mut file = File::create(format!("{}.json", file_name)).unwrap();
     let out = String::from("{\n  \"program\": ")
