@@ -33,6 +33,7 @@ mod cli;
 mod elf_parser;
 mod memory;
 mod output;
+mod resolver;
 mod riscv;
 
 fn main() {
@@ -46,12 +47,14 @@ fn main() {
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
 
-    let bitvm_instructions = match binary_info.isa {
+    let unresolved_instructions = match binary_info.isa {
         elf_parser::Isa::Riscv32 | elf_parser::Isa::Riscv64 => {
             riscv::generate_code(binary_info, decoded_binary)
         }
         elf_parser::Isa::None => panic!("ISA not supported!"),
     };
+
+    let bitvm_instructions = resolver::resolve(unresolved_instructions);
 
     let memory = memory::organize(binary);
 

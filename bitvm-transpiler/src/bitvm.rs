@@ -47,3 +47,57 @@ pub struct Instruction {
     pub address_b: u32,
     pub address_c: u32,
 }
+
+/// Possible labels for a RISC-V instruction.
+#[derive(Debug, Clone, Copy)]
+pub enum Labels {
+    /// Represents program counter of the real RISC-V instruction.
+    Pc(u64),
+    /// Represents real program end.
+    _ProgramEnd,
+}
+
+/// This struct will be used by the resolver to generate final BitVM assembly
+/// instructions.
+#[derive(Debug, Clone, Copy)]
+pub struct UnresolvedInstruction {
+    pub instr: Instruction,
+    /// After code generation, this will be updated.
+    pub bitvm_pc: u64,
+    /// Metadata for resolver.
+    pub label: Labels,
+    /// If set, address_c will be resolved to label.
+    pub needs_resolving: bool,
+}
+
+impl UnresolvedInstruction {
+    /// Creates a new unresolved instruction.
+    pub fn _new() -> Self {
+        Self {
+            instr: Instruction {
+                asm_type: 0,
+                address_a: 0,
+                address_b: 0,
+                address_c: 0,
+            },
+            bitvm_pc: 0,
+            label: Labels::Pc(0),
+            needs_resolving: false,
+        }
+    }
+
+    /// Creates an unresolved instruction, using a BitVM instruction.
+    pub fn from(instr: Instruction) -> Self {
+        Self {
+            instr: instr,
+            bitvm_pc: 0,
+            label: Labels::Pc(0),
+            needs_resolving: false,
+        }
+    }
+
+    /// Returns the generated BitVM instruction, without actually resolving.
+    pub fn _lazy_resolve(&self) -> Instruction {
+        self.instr
+    }
+}
