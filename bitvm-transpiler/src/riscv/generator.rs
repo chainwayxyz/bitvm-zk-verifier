@@ -542,6 +542,7 @@ fn jal(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
             address_c: reg2mem(instruction.rd),
         },
         bitvm::Instruction {
+            // TODO: this needs to be relative to pc
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
@@ -685,6 +686,7 @@ fn lb(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             address_c: reg2mem(instruction.rd),
         },
         bitvm::Instruction {
+            // get MSB
             asm_type: bitvm::ASM_ANDI,
             address_a: reg2mem(instruction.rd),
             address_b: 0x80,
@@ -796,7 +798,7 @@ fn lw(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
         },
     ];
 
-    for _ in 0..8 {
+    for _ in 0..3 {
         ret.push(bitvm::Instruction {
             asm_type: bitvm::ASM_SUBI,
             address_a: tmp(),
@@ -912,7 +914,7 @@ fn sh(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
 
     for _ in 0..8 {
         ret.push(bitvm::Instruction {
-            asm_type: bitvm::ASM_ADD,
+            asm_type: bitvm::ASM_RSHIFT1,
             address_a: tmp2(),
             address_b: tmp2(),
             address_c: tmp2(),
@@ -963,10 +965,10 @@ fn sw(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             address_c: tmp3(),
         });
         ret.push(bitvm::Instruction {
-            asm_type: bitvm::ASM_ADD,
-            address_a: reg2mem(instruction.rs2),
-            address_b: 0,
-            address_c: tmp2(),
+            asm_type: bitvm::ASM_STORE,
+            address_a: tmp3(),
+            address_b: tmp(),
+            address_c: 0,
         });
         // Prepare for the next byte unless it's the last byte
         if i < 3 {
@@ -1061,7 +1063,7 @@ fn beq(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
         asm_type: bitvm::ASM_BEQ,
         address_a: reg2mem(instruction.rs1),
         address_b: reg2mem(instruction.rs2),
-        address_c: info.pc as u32 + instruction.imm,
+        address_c: info.pc as u32 + instruction.imm, // TODO: check pc relative addressing
     }]
 }
 
@@ -1071,7 +1073,7 @@ fn bne(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::Instruction> {
         asm_type: bitvm::ASM_BNE,
         address_a: reg2mem(instruction.rs1),
         address_b: reg2mem(instruction.rs2),
-        address_c: info.pc as u32 + instruction.imm,
+        address_c: info.pc as u32 + instruction.imm, // TODO: check pc relative addressing
     }]
 }
 
@@ -1089,9 +1091,9 @@ fn slli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
         for __ in 0..8 {
             ret.push(bitvm::Instruction {
                 asm_type: bitvm::ASM_ADD,
-                address_a: tmp2(),
-                address_b: tmp2(),
-                address_c: tmp2(),
+                address_a: reg2mem(instruction.rd),
+                address_b: reg2mem(instruction.rd),
+                address_c: reg2mem(instruction.rd),
             });
         }
     }
@@ -1152,26 +1154,24 @@ fn srai(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
     }];
 
     for _ in 0..(instruction.imm) {
-        for __ in 0..8 {
-            ret.push(bitvm::Instruction {
-                asm_type: bitvm::ASM_ANDI,
-                address_a: reg2mem(instruction.rd),
-                address_b: 0x80000000,
-                address_c: tmp3(),
-            });
-            ret.push(bitvm::Instruction {
-                asm_type: bitvm::ASM_RSHIFT1,
-                address_a: reg2mem(instruction.rd),
-                address_b: 0,
-                address_c: reg2mem(instruction.rd),
-            });
-            ret.push(bitvm::Instruction {
-                asm_type: bitvm::ASM_OR,
-                address_a: reg2mem(instruction.rd),
-                address_b: tmp3(),
-                address_c: reg2mem(instruction.rd),
-            });
-        }
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_ANDI,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0x80000000,
+            address_c: tmp3(),
+        });
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_RSHIFT1,
+            address_a: reg2mem(instruction.rd),
+            address_b: 0,
+            address_c: reg2mem(instruction.rd),
+        });
+        ret.push(bitvm::Instruction {
+            asm_type: bitvm::ASM_OR,
+            address_a: reg2mem(instruction.rd),
+            address_b: tmp3(),
+            address_c: reg2mem(instruction.rd),
+        });
     }
 
     ret
@@ -1241,7 +1241,7 @@ fn blt(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             asm_type: bitvm::ASM_BNE,
             address_a: tmp(),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check pc relative addressing
         },
     ]
 }
@@ -1258,7 +1258,7 @@ fn bltu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
             asm_type: bitvm::ASM_BNE,
             address_a: tmp(),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check pc relative addressing
         },
     ]
 }
@@ -1266,7 +1266,7 @@ fn bltu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> 
 fn bge(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
     vec![
         bitvm::Instruction {
-            asm_type: bitvm::ASM_SLTU,
+            asm_type: bitvm::ASM_SLT,
             address_a: reg2mem(instruction.rs1),
             address_b: reg2mem(instruction.rs2),
             address_c: tmp(),
@@ -1275,7 +1275,7 @@ fn bge(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             asm_type: bitvm::ASM_BEQ,
             address_a: tmp(),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check pc relative addressing
         },
     ]
 }
@@ -1311,7 +1311,7 @@ fn ecall(_instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(10),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check label
         },
     ]
 }
@@ -1328,7 +1328,7 @@ fn ebreak(_instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instructio
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check label
         },
     ]
 }
@@ -1359,13 +1359,13 @@ fn sra(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check label
         },
         bitvm::Instruction {
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: tmp2(),
-            address_c: 0,
+            address_c: 0, // TODO: Check label
         },
         bitvm::Instruction {
             asm_type: bitvm::ASM_ANDI,
@@ -1380,6 +1380,7 @@ fn sra(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             address_c: tmp(),
         },
         bitvm::Instruction {
+            // add MSB
             asm_type: bitvm::ASM_OR,
             address_a: tmp(),
             address_b: tmp3(),
@@ -1392,12 +1393,14 @@ fn sra(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             address_c: tmp2(),
         },
         bitvm::Instruction {
+            // TODO: Check label
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
             address_c: 0,
         },
         bitvm::Instruction {
+            // TODO: Check label
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
@@ -1436,12 +1439,14 @@ fn srl(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             address_c: tmp2(),
         },
         bitvm::Instruction {
+            // TODO: Check label
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
             address_c: 0,
         },
         bitvm::Instruction {
+            // TODO: Check label
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: tmp2(),
@@ -1460,12 +1465,14 @@ fn srl(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             address_c: tmp2(),
         },
         bitvm::Instruction {
+            // TODO: Check label
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
             address_c: 0,
         },
         bitvm::Instruction {
+            // TODO: Check label
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
@@ -1507,13 +1514,13 @@ fn sll(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             asm_type: bitvm::ASM_ADDI,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check label
         },
         bitvm::Instruction {
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: tmp2(),
-            address_c: 0,
+            address_c: 0, // TODO: Check label
         },
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADD,
@@ -1531,7 +1538,7 @@ fn sll(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Instruction> {
             asm_type: bitvm::ASM_BEQ,
             address_a: reg2mem(0),
             address_b: reg2mem(0),
-            address_c: 0,
+            address_c: 0, // TODO: Check label
         },
         bitvm::Instruction {
             asm_type: bitvm::ASM_ADDI,
