@@ -51,6 +51,7 @@ pub struct Instruction {
 /// Possible labels for a RISC-V instruction.
 #[derive(Debug, Clone, Copy)]
 pub enum Labels {
+    None,
     /// Represents program counter of the real RISC-V instruction.
     Pc(u64),
     /// Represents real program end.
@@ -62,12 +63,13 @@ pub enum Labels {
 #[derive(Debug, Clone, Copy)]
 pub struct UnresolvedInstruction {
     pub instr: Instruction,
+    /// Real program counter in the actual binary.
+    pub real_pc: u64,
     /// After code generation, this will be updated.
     pub bitvm_pc: u64,
-    /// Metadata for resolver.
+    /// Metadata for resolver. If set other than Labels::None, it will be
+    /// resolved by the resolver.
     pub label: Labels,
-    /// If set, address_c will be resolved to label.
-    pub needs_resolving: bool,
 }
 
 impl UnresolvedInstruction {
@@ -80,9 +82,9 @@ impl UnresolvedInstruction {
                 address_b: 0,
                 address_c: 0,
             },
+            real_pc: 0,
             bitvm_pc: 0,
-            label: Labels::Pc(0),
-            needs_resolving: false,
+            label: Labels::None,
         }
     }
 
@@ -90,9 +92,9 @@ impl UnresolvedInstruction {
     pub fn from(instr: Instruction) -> Self {
         Self {
             instr: instr,
+            real_pc: 0,
             bitvm_pc: 0,
-            label: Labels::Pc(0),
-            needs_resolving: false,
+            label: Labels::None,
         }
     }
 

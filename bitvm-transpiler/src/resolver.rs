@@ -18,13 +18,35 @@
 //! code. This operation is not ISA specific.
 
 use crate::bitvm;
+use crate::bitvm::Labels;
 
 pub fn resolve(instructions: Vec<bitvm::UnresolvedInstruction>) -> Vec<bitvm::Instruction> {
     let mut resolved = Vec::new();
 
-	for i in instructions {
-		resolved.push(i.instr);
-	}
+    for mut i in instructions.clone() {
+        match i.label {
+            // This instruction does not need any afterwork.
+            Labels::None => (),
+            // This instruction needs a new PC assignment.
+            Labels::Pc(pc) => {
+                for j in instructions.clone() {
+                    if j.real_pc == pc {
+                        // We need to convert real pc to bitvm counterpart.
+                        i.instr.address_c = j.bitvm_pc as u32;
+                        break;
+                    } else if j.real_pc > pc {
+                        // No need to keep looking: PC will only go upwards.
+                        break;
+                    }
+                    // TODO: If this loop can't find what it's looking for, it
+                    // will silently skip. Is it safe?
+                }
+            }
+            _ => (),
+        }
 
-	resolved
+        resolved.push(i.instr);
+    }
+
+    resolved
 }

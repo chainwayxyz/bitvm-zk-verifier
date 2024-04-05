@@ -95,11 +95,21 @@ pub fn generate_code(
             _ => panic!("Illegal instruction: {:#?}", i.instr),
         };
 
-        for j in instr {
+        // Assign actual RISC-V PC to every instruction. This can help resolver
+        // to determine new jump location. Also, add instructions one by one to
+        // return value.
+        for mut j in instr {
+            j.real_pc = info.pc;
             bitvm_instructions.push(j);
         }
 
+        // Iterate RISc-V PC.
         info.pc += 1;
+    }
+
+    // Assign BitVM program counters.
+    for i in 0..bitvm_instructions.len() {
+        bitvm_instructions[i].bitvm_pc = i as u64;
     }
 
     bitvm_instructions
