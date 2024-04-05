@@ -360,3 +360,115 @@ fn decode_raw_instruction(raw_instruction: u32) -> Result<Instruction, String> {
         imm,
     })
 }
+
+/// These tests currently does not covers all of the instructions. I just chose
+/// some random instructions and called it a day. In the future, we can add full
+/// coverage if needed.
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::riscv::{Instruction, RiscvInstructions::*};
+
+    #[test]
+    fn add() {
+        // add x10, x2, x5
+        let raw: u32 = 0x00510533;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(
+            result,
+            Instruction {
+                instr: ADD,
+                rs1: 2,
+                rs2: 5,
+                rd: 10,
+                imm: 0,
+            }
+        );
+
+        // add x31 x1 x21
+        let raw: u32 = 0x01508fb3;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(
+            result,
+            Instruction {
+                instr: ADD,
+                rs1: 1,
+                rs2: 21,
+                rd: 31,
+                imm: 0,
+            }
+        );
+
+        // add x31 x1 x21
+        let raw: u32 = 0x01508fb3;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(
+            result,
+            Instruction {
+                instr: ADD,
+                rs1: 1,
+                rs2: 21,
+                rd: 31,
+                imm: 0,
+            }
+        );
+
+        // addi x31 x1 21
+        let raw: u32 = 0x01508f93;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_ne!(
+            result,
+            Instruction {
+                instr: ADD,
+                rs1: 1,
+                rs2: 21,
+                rd: 31,
+                imm: 0,
+            }
+        );
+    }
+
+    #[test]
+    fn addi() {
+        // addi x11 x1 21
+        let raw: u32 = 0x01508593;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, ADDI);
+        assert_eq!(result.rs1, 1);
+        assert_eq!(result.rd, 11);
+        assert_eq!(result.imm, 21);
+
+        // addi x31 x30 0
+        let raw: u32 = 0x000f0f93;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, ADDI);
+        assert_eq!(result.rs1, 30);
+        assert_eq!(result.rd, 31);
+        assert_eq!(result.imm, 0);
+
+        // addi x14 x30 345
+        let raw: u32 = 0x159f0713;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, ADDI);
+        assert_eq!(result.rs1, 30);
+        assert_eq!(result.rd, 14);
+        assert_eq!(result.imm, 345);
+
+        // addi x14 x15 9999999 -> addi x14 x15 1663
+        let raw: u32 = 0x67f78713;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, ADDI);
+        assert_eq!(result.rs1, 15);
+        assert_eq!(result.rd, 14);
+        assert_ne!(result.imm, 9999999);
+        assert_eq!(result.imm, 1663);
+
+        // add x31 x1 x21
+        let raw: u32 = 0x01508fb3;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, ADD);
+        assert_eq!(result.rs1, 1);
+        assert_eq!(result.rs2, 21);
+        assert_eq!(result.rd, 31);
+    }
+}
