@@ -203,13 +203,17 @@ fn jal(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::UnresolvedInstr
             address_b: info.pc as u32 + 4,
             address_c: reg2mem(instruction.rd),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            // TODO: this needs to be relative to pc
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
+        bitvm::UnresolvedInstruction {
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Pc(info.pc + instruction.imm as u64),
+            real_pc: 0,  // This will be overridden later.
+            bitvm_pc: 0, // This will be overridden later.
+        },
     ]
 }
 
@@ -721,22 +725,32 @@ fn lui(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
 /// BitVM compares address_a and address_b for BEQ. If equal, changes PC to
 /// address_c. Therefore we add immediate value and RISC-V PC for the address_c.
 fn beq(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
-    vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-        asm_type: bitvm::ASM_BEQ,
-        address_a: reg2mem(instruction.rs1),
-        address_b: reg2mem(instruction.rs2),
-        address_c: info.pc as u32 + instruction.imm, // TODO: check pc relative addressing
-    })]
+    vec![bitvm::UnresolvedInstruction {
+        instr: bitvm::Instruction {
+            asm_type: bitvm::ASM_BEQ,
+            address_a: reg2mem(instruction.rs1),
+            address_b: reg2mem(instruction.rs2),
+            address_c: 0,
+        },
+        label: bitvm::Labels::Pc(info.pc as u64 + instruction.imm as u64),
+        real_pc: 0,  // This will be overridden later.
+        bitvm_pc: 0, // This will be overridden later.
+    }]
 }
 
 /// BNE works same way as the BEQ.
 fn bne(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
-    vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-        asm_type: bitvm::ASM_BNE,
-        address_a: reg2mem(instruction.rs1),
-        address_b: reg2mem(instruction.rs2),
-        address_c: info.pc as u32 + instruction.imm, // TODO: check pc relative addressing
-    })]
+    vec![bitvm::UnresolvedInstruction {
+        instr: bitvm::Instruction {
+            asm_type: bitvm::ASM_BNE,
+            address_a: reg2mem(instruction.rs1),
+            address_b: reg2mem(instruction.rs2),
+            address_c: 0,
+        },
+        label: bitvm::Labels::Pc(info.pc as u64 + instruction.imm as u64),
+        real_pc: 0,  // This will be overridden later.
+        bitvm_pc: 0, // This will be overridden later.
+    }]
 }
 
 fn slli(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
@@ -891,7 +905,7 @@ fn slti(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedIns
     ]
 }
 
-fn blt(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
+fn blt(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
     vec![
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
             asm_type: bitvm::ASM_SLT,
@@ -899,16 +913,21 @@ fn blt(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: reg2mem(instruction.rs2),
             address_c: tmp(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BNE,
-            address_a: tmp(),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check pc relative addressing
-        }),
+        bitvm::UnresolvedInstruction {
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BNE,
+                address_a: tmp(),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Pc(info.pc + instruction.imm as u64),
+            real_pc: 0,  // This will be overridden later.
+            bitvm_pc: 0, // This will be overridden later.
+        },
     ]
 }
 
-fn bltu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
+fn bltu(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
     vec![
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
             asm_type: bitvm::ASM_SLTU,
@@ -916,16 +935,21 @@ fn bltu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedIns
             address_b: reg2mem(instruction.rs2),
             address_c: tmp(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BNE,
-            address_a: tmp(),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check pc relative addressing
-        }),
+        bitvm::UnresolvedInstruction {
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BNE,
+                address_a: tmp(),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Pc(info.pc + instruction.imm as u64),
+            real_pc: 0,  // This will be overridden later.
+            bitvm_pc: 0, // This will be overridden later.
+        },
     ]
 }
 
-fn bge(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
+fn bge(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
     vec![
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
             asm_type: bitvm::ASM_SLT,
@@ -933,16 +957,21 @@ fn bge(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: reg2mem(instruction.rs2),
             address_c: tmp(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BEQ,
-            address_a: tmp(),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check pc relative addressing
-        }),
+        bitvm::UnresolvedInstruction {
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: tmp(),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Pc(info.pc + instruction.imm as u64),
+            real_pc: 0,  // This will be overridden later.
+            bitvm_pc: 0, // This will be overridden later.
+        },
     ]
 }
 
-fn bgeu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
+fn bgeu(instruction: Instruction, info: BinaryInfo) -> Vec<bitvm::UnresolvedInstruction> {
     vec![
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
             asm_type: bitvm::ASM_SLTU,
@@ -950,12 +979,17 @@ fn bgeu(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedIns
             address_b: reg2mem(instruction.rs2),
             address_c: tmp(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BEQ,
-            address_a: tmp(),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
+        bitvm::UnresolvedInstruction {
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: tmp(),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Pc(info.pc + instruction.imm as u64),
+            real_pc: 0,  // This will be overridden later.
+            bitvm_pc: 0, // This will be overridden later.
+        },
     ]
 }
 
@@ -968,13 +1002,18 @@ fn ecall(_instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedI
             address_b: 1,
             address_c: tmp(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+        bitvm::UnresolvedInstruction {
             // if x10 / a0 is 0, finish program
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(10),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check label
-        }),
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(10),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::ProgramEnd,
+            real_pc: 0,  // This will be overridden later.
+            bitvm_pc: 0, // This will be overridden later.
+        },
     ]
 }
 
@@ -986,12 +1025,17 @@ fn ebreak(_instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::Unresolved
             address_b: 2,
             address_c: tmp(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check label
-        }),
+        bitvm::UnresolvedInstruction {
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: 0, // TODO: This needs to point program end
+            },
+            label: bitvm::Labels::ProgramEnd,
+            real_pc: 0,  // This will be overridden later.
+            bitvm_pc: 0, // This will be overridden later.
+        },
     ]
 }
 
@@ -1017,18 +1061,19 @@ fn sra(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: 0x1F,
             address_c: tmp2(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_ADDI,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check label
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: tmp2(),
-            address_c: 0, // TODO: Check label
-        }),
+        bitvm::UnresolvedInstruction {
+            // This is the start of the loop.
+            // This also jumps to end of the loop if condition is satisfied.
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: tmp2(),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Relative(6), // Jump 6 instructions forward.
+            real_pc: 0,                        // This will be overridden later.
+            bitvm_pc: 0,                       // This will be overridden later.
+        },
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
             asm_type: bitvm::ASM_ANDI,
             address_a: tmp(),
@@ -1054,21 +1099,20 @@ fn sra(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: 1,
             address_c: tmp2(),
         }),
+        bitvm::UnresolvedInstruction {
+            // This jumps to the start of the loop.
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Relative(-5), // Jump 5 instructions backwards.
+            real_pc: 0,                         // This will be overridden later.
+            bitvm_pc: 0,                        // This will be overridden later.
+        },
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            // TODO: Check label
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            // TODO: Check label
-            asm_type: bitvm::ASM_ADDI,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+            // This is the end of the loop.
             // result
             asm_type: bitvm::ASM_ADDI,
             address_a: tmp(),
@@ -1100,20 +1144,19 @@ fn srl(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: 0x1F,
             address_c: tmp2(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            // TODO: Check label
-            asm_type: bitvm::ASM_ADDI,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            // TODO: Check label
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: tmp2(),
-            address_c: 0,
-        }),
+        bitvm::UnresolvedInstruction {
+            // This is the start of the loop.
+            // This also jumps to end of the loop if condition is satisfied.
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: tmp2(),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Relative(4), // Jump 4 instructions forward.
+            real_pc: 0,                        // This will be overridden later.
+            bitvm_pc: 0,                       // This will be overridden later.
+        },
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
             asm_type: bitvm::ASM_RSHIFT1,
             address_a: tmp(),
@@ -1126,21 +1169,20 @@ fn srl(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: 1,
             address_c: tmp2(),
         }),
+        bitvm::UnresolvedInstruction {
+            // This jumps to the start of the loop.
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Relative(-3), // Jump 3 instructions backwards.
+            real_pc: 0,                         // This will be overridden later.
+            bitvm_pc: 0,                        // This will be overridden later.
+        },
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            // TODO: Check label
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            // TODO: Check label
-            asm_type: bitvm::ASM_ADDI,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+            // This is the end of the loop.
             // result
             asm_type: bitvm::ASM_ADDI,
             address_a: tmp(),
@@ -1172,18 +1214,19 @@ fn sll(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: 0x1F,
             address_c: tmp2(),
         }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_ADDI,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check label
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: tmp2(),
-            address_c: 0, // TODO: Check label
-        }),
+        bitvm::UnresolvedInstruction {
+            // This is the start of the loop.
+            // This also jumps to end of the loop if condition is satisfied.
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: tmp2(),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Relative(4), // Jump 4 instructions forward.
+            real_pc: 0,                        // This will be overridden later.
+            bitvm_pc: 0,                       // This will be overridden later.
+        },
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
             asm_type: bitvm::ASM_ADD,
             address_a: tmp(),
@@ -1196,19 +1239,20 @@ fn sll(instruction: Instruction, _info: BinaryInfo) -> Vec<bitvm::UnresolvedInst
             address_b: 1,
             address_c: tmp2(),
         }),
+        bitvm::UnresolvedInstruction {
+            // This jumps to the start of the loop.
+            instr: bitvm::Instruction {
+                asm_type: bitvm::ASM_BEQ,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: 0,
+            },
+            label: bitvm::Labels::Relative(-3), // Jump 3 instructions backwards.
+            real_pc: 0,                         // This will be overridden later.
+            bitvm_pc: 0,                        // This will be overridden later.
+        },
         bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_BEQ,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0, // TODO: Check label
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-            asm_type: bitvm::ASM_ADDI,
-            address_a: reg2mem(0),
-            address_b: reg2mem(0),
-            address_c: 0,
-        }),
-        bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+            // This is the end of the loop.
             // result
             asm_type: bitvm::ASM_ADDI,
             address_a: tmp(),

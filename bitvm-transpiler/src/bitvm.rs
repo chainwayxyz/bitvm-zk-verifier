@@ -54,8 +54,10 @@ pub enum Labels {
     None,
     /// Represents program counter of the real RISC-V instruction.
     Pc(u64),
-    /// Represents real program end.
-    _ProgramEnd,
+    /// Jump to an address relative to current pc. This can help creating loops.
+    Relative(i64),
+    /// Can be used to exit program early.
+    ProgramEnd,
 }
 
 /// This struct will be used by the resolver to generate final BitVM assembly
@@ -63,13 +65,13 @@ pub enum Labels {
 #[derive(Debug, Clone, Copy)]
 pub struct UnresolvedInstruction {
     pub instr: Instruction,
+    /// Metadata for resolver. If set other than Labels::None, it will be
+    /// resolved by the resolver.
+    pub label: Labels,
     /// Real program counter in the actual binary.
     pub real_pc: u64,
     /// After code generation, this will be updated.
     pub bitvm_pc: u64,
-    /// Metadata for resolver. If set other than Labels::None, it will be
-    /// resolved by the resolver.
-    pub label: Labels,
 }
 
 impl UnresolvedInstruction {
