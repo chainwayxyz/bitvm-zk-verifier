@@ -24,7 +24,9 @@
 //! 1. Parse CLI flags and options
 //! 2. Read input binary file and get instructions
 //! 3. Run ISA specific decoder
-//! 4. Run ISA specific BitVM assembler
+//! 4. Run ISA specific BitVM code generator
+//! 5. Run resolver to resolve addresses that can't be determined while
+//! generating code
 //! 5. Organize memory
 //! 6. Write BitVM assembly and memory to a file
 
