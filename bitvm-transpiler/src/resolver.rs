@@ -22,6 +22,7 @@ use crate::bitvm::Labels;
 
 pub fn resolve(instructions: Vec<bitvm::UnresolvedInstruction>) -> Vec<bitvm::Instruction> {
     let mut resolved = Vec::new();
+    let program_end = instructions.len() - 1;
 
     for mut i in instructions.clone() {
         match i.label {
@@ -41,6 +42,9 @@ pub fn resolve(instructions: Vec<bitvm::UnresolvedInstruction>) -> Vec<bitvm::In
                     // TODO: If this loop can't find what it's looking for, it
                     // will silently skip. Is it safe?
                 }
+            }
+            Labels::ProgramEnd => {
+                i.instr.address_c = program_end as u32;
             }
             _ => (),
         }
