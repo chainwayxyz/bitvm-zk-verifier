@@ -471,4 +471,40 @@ mod tests {
         assert_eq!(result.rs2, 21);
         assert_eq!(result.rd, 31);
     }
+
+    #[test]
+    fn beq() {
+        // beq x23 x13 132
+        let raw: u32 = 0x08db8263;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, BEQ);
+        assert_eq!(result.rs1, 23);
+        assert_eq!(result.rs2, 13);
+        assert_eq!(result.imm, 132);
+
+        // beq x3 x4 1324
+        let raw: u32 = 0x52418663;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, BEQ);
+        assert_eq!(result.rs1, 3);
+        assert_eq!(result.rs2, 4);
+        assert_eq!(result.imm, 1324);
+    }
+
+    #[test]
+    fn jal() {
+        // jal x11 1324
+        let raw: u32 = 0x52c005ef;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, JAL);
+        assert_eq!(result.rd, 11);
+        assert_eq!(result.imm, 1324);
+
+        // jal x3 9998
+        let raw: u32 = 0x70e021ef;
+        let result = decode_raw_instruction(raw).unwrap();
+        assert_eq!(result.instr, JAL);
+        assert_eq!(result.rd, 3);
+        assert_eq!(result.imm, 9998);
+    }
 }
