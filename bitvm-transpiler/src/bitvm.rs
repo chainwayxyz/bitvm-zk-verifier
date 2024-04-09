@@ -49,7 +49,7 @@ pub struct Instruction {
 }
 
 /// Possible labels for a RISC-V instruction.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Labels {
     None,
     /// Represents program counter of the real RISC-V instruction.
@@ -62,7 +62,7 @@ pub enum Labels {
 
 /// This struct will be used by the resolver to generate final BitVM assembly
 /// instructions.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct UnresolvedInstruction {
     pub instr: Instruction,
     /// Metadata for resolver. If set other than Labels::None, it will be
