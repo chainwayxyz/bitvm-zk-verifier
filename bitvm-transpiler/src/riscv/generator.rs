@@ -1445,211 +1445,211 @@ mod tests {
         assert_eq!(generate_code(tests::INFO, input), expected);
     }
 
-    // #[test]
-    // fn test_add() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_add() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         add(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ADD,
-    //             address_a: reg2mem(1),
-    //             address_b: reg2mem(2),
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            add(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         add(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ADD,
-    //             address_a: reg2mem(0),
-    //             address_b: reg2mem(0),
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            add(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ADD,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 
-    // #[test]
-    // fn test_addi() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_addi() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         addi(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ADDI,
-    //             address_a: reg2mem(1),
-    //             address_b: 4,
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            addi(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ADDI,
+                address_a: reg2mem(1),
+                address_b: 4,
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         addi(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ADDI,
-    //             address_a: reg2mem(0),
-    //             address_b: 0,
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            addi(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ADDI,
+                address_a: reg2mem(0),
+                address_b: 0,
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 
-    // #[test]
-    // fn test_sub() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_sub() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         sub(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_SUB,
-    //             address_a: reg2mem(1),
-    //             address_b: reg2mem(2),
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            sub(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_SUB,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         sub(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_SUB,
-    //             address_a: reg2mem(0),
-    //             address_b: reg2mem(0),
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            sub(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_SUB,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 
-    // #[test]
-    // fn test_xor() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_xor() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         xor(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_XOR,
-    //             address_a: reg2mem(1),
-    //             address_b: reg2mem(2),
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            xor(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_XOR,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         xor(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_XOR,
-    //             address_a: reg2mem(0),
-    //             address_b: reg2mem(0),
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            xor(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_XOR,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 
-    // #[test]
-    // fn test_xori() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_xori() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         xori(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_XORI,
-    //             address_a: reg2mem(1),
-    //             address_b: 4,
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            xori(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_XORI,
+                address_a: reg2mem(1),
+                address_b: 4,
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         xori(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_XORI,
-    //             address_a: reg2mem(0),
-    //             address_b: 0,
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            xori(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_XORI,
+                address_a: reg2mem(0),
+                address_b: 0,
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 
-    // #[test]
-    // fn test_andi() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_andi() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         andi(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ANDI,
-    //             address_a: reg2mem(1),
-    //             address_b: 4,
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            andi(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ANDI,
+                address_a: reg2mem(1),
+                address_b: 4,
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         andi(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ANDI,
-    //             address_a: reg2mem(0),
-    //             address_b: 0,
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            andi(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ANDI,
+                address_a: reg2mem(0),
+                address_b: 0,
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 
-    // #[test]
-    // fn test_or() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_or() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         or(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_OR,
-    //             address_a: reg2mem(1),
-    //             address_b: reg2mem(2),
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            or(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_OR,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         or(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_OR,
-    //             address_a: reg2mem(0),
-    //             address_b: reg2mem(0),
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            or(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_OR,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 
-    // #[test]
-    // fn test_ori() {
-    //     let mut input = tests::INPUT;
+    #[test]
+    fn test_ori() {
+        let mut input = tests::INPUT;
 
-    //     assert_eq!(
-    //         ori(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ORI,
-    //             address_a: reg2mem(1),
-    //             address_b: 4,
-    //             address_c: reg2mem(3)
-    //         })]
-    //     );
+        assert_eq!(
+            ori(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ORI,
+                address_a: reg2mem(1),
+                address_b: 4,
+                address_c: reg2mem(3)
+            })]
+        );
 
-    //     tests::make_it_zero(&mut input);
-    //     assert_eq!(
-    //         ori(input, tests::INFO),
-    //         vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
-    //             asm_type: bitvm::ASM_ORI,
-    //             address_a: reg2mem(0),
-    //             address_b: 0,
-    //             address_c: reg2mem(0)
-    //         })]
-    //     );
-    // }
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            ori(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_ORI,
+                address_a: reg2mem(0),
+                address_b: 0,
+                address_c: reg2mem(0)
+            })]
+        );
+    }
 }
