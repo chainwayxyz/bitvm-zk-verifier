@@ -1576,6 +1576,32 @@ mod tests {
     }
 
     #[test]
+    fn test_and() {
+        let mut input = tests::INPUT;
+
+        assert_eq!(
+            and(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_AND,
+                address_a: reg2mem(1),
+                address_b: reg2mem(2),
+                address_c: reg2mem(3)
+            })]
+        );
+
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            and(input, tests::INFO),
+            vec![bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                asm_type: bitvm::ASM_AND,
+                address_a: reg2mem(0),
+                address_b: reg2mem(0),
+                address_c: reg2mem(0)
+            })]
+        );
+    }
+
+    #[test]
     fn test_andi() {
         let mut input = tests::INPUT;
 
@@ -1650,6 +1676,60 @@ mod tests {
                 address_b: 0,
                 address_c: reg2mem(0)
             })]
+        );
+    }
+
+    #[test]
+    fn test_jal() {
+        let mut input = tests::INPUT;
+
+        assert_eq!(
+            jal(input, tests::INFO),
+            vec![
+                bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADDI,
+                    address_a: reg2mem(0),
+                    address_b: 4,
+                    address_c: reg2mem(3)
+                }),
+                bitvm::UnresolvedInstruction {
+                    instr: bitvm::Instruction {
+                        asm_type: bitvm::ASM_BEQ,
+                        address_a: reg2mem(0),
+                        address_b: reg2mem(0),
+                        address_c: reg2mem(0)
+                    },
+                    // Code generator won't modify pc values directly.
+                    label: bitvm::Labels::Pc(4),
+                    real_pc: 0,
+                    bitvm_pc: 0,
+                }
+            ]
+        );
+
+        tests::make_it_zero(&mut input);
+        assert_eq!(
+            jal(input, tests::INFO),
+            vec![
+                bitvm::UnresolvedInstruction::from(bitvm::Instruction {
+                    asm_type: bitvm::ASM_ADDI,
+                    address_a: reg2mem(0),
+                    address_b: 4,
+                    address_c: reg2mem(0)
+                }),
+                bitvm::UnresolvedInstruction {
+                    instr: bitvm::Instruction {
+                        asm_type: bitvm::ASM_BEQ,
+                        address_a: reg2mem(0),
+                        address_b: reg2mem(0),
+                        address_c: reg2mem(0)
+                    },
+                    // Code generator won't modify pc values directly.
+                    label: bitvm::Labels::Pc(0),
+                    real_pc: 0,
+                    bitvm_pc: 0,
+                }
+            ]
         );
     }
 }
