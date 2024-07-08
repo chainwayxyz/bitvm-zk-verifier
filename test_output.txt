@@ -1,0 +1,447 @@
+   Compiling bitcoin-pow-methods v0.1.0 (/home/ozan/bitvm-zk-verifier/examples/bitcoin-pow/methods)
+   Compiling hello-world-methods v0.1.0 (/home/ozan/bitvm-zk-verifier/examples/hello-world/methods)
+warning: unused import: `fs::File`
+  --> /home/ozan/risc0/risc0/zkvm/src/host/recursion/prove/mod.rs:21:46
+   |
+21 | use std::{collections::VecDeque, fmt::Debug, fs::File, mem::take, rc::Rc};
+   |                                              ^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `risc0_groth16::to_json`
+  --> /home/ozan/risc0/risc0/zkvm/src/host/recursion/prove/mod.rs:30:5
+   |
+30 | use risc0_groth16::to_json;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `risc0-zkvm` (lib) generated 2 warnings (run `cargo fix --lib -p risc0-zkvm` to apply 2 suggestions)
+   Compiling hello-world v0.1.0 (/home/ozan/bitvm-zk-verifier/examples/hello-world)
+   Compiling bitcoin-pow v0.1.0 (/home/ozan/bitvm-zk-verifier/examples/bitcoin-pow)
+   Compiling risc0tobitvm v0.1.0 (/home/ozan/bitvm-zk-verifier/risc0tobitvm)
+warning: unused imports: `ProofJson`, `Verifier`, and `to_json`
+ --> risc0tobitvm/src/lib.rs:3:21
+  |
+3 | use risc0_groth16::{to_json, ProofJson, Verifier};
+  |                     ^^^^^^^  ^^^^^^^^^  ^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `PublicInputsJson`, `Seal`, and `verifying_key`
+ --> risc0tobitvm/src/lib.rs:4:21
+  |
+4 | use risc0_groth16::{verifying_key, PublicInputsJson, Seal};
+  |                     ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^  ^^^^
+
+warning: unused import: `recursion::identity_p254`
+ --> risc0tobitvm/src/lib.rs:6:37
+  |
+6 | use risc0_zkvm::{get_prover_server, recursion::identity_p254, ProverOpts, GUEST_MAX_MEM};
+  |                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `MaybePruned` and `ReceiptClaim`
+ --> risc0tobitvm/src/lib.rs:7:18
+  |
+7 | use risc0_zkvm::{MaybePruned, Receipt, ReceiptClaim};
+  |                  ^^^^^^^^^^^           ^^^^^^^^^^^^
+
+warning: unused import: `serde_json::from_str`
+ --> risc0tobitvm/src/lib.rs:8:5
+  |
+8 | use serde_json::from_str;
+  |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::fs::read_to_string`
+  --> risc0tobitvm/src/lib.rs:11:5
+   |
+11 | use std::fs::read_to_string;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `fs::File`, `io::Cursor`, and `path::Path`
+  --> risc0tobitvm/src/lib.rs:12:11
+   |
+12 | use std::{fs::File, io::Cursor, path::Path};
+   |           ^^^^^^^^  ^^^^^^^^^^  ^^^^^^^^^^
+
+warning: unused variable: `template`
+  --> risc0tobitvm/src/lib.rs:75:33
+   |
+75 | pub fn prove(receipt: &Receipt, template: &mut String) {
+   |                                 ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_template`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: `risc0tobitvm` (lib) generated 8 warnings (run `cargo fix --lib -p risc0tobitvm` to apply 7 suggestions)
+warning: unused imports: `Groth16Receipt`, `ProverOpts`, `SuccinctReceipt`, `get_prover_server`, and `recursion::identity_p254`
+ --> risc0tobitvm/src/main.rs:1:18
+  |
+1 | use risc0_zkvm::{get_prover_server, recursion::identity_p254, Groth16Receipt, ProverOpts, SuccinctReceipt};
+  |                  ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^  ^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `risc0_groth16::to_json`
+ --> risc0tobitvm/src/main.rs:3:5
+  |
+3 | use risc0_groth16::to_json;
+  |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `BufReader`, `BufWriter`, `Cursor`, `File`, `Write`, and `path::Path`
+ --> risc0tobitvm/src/main.rs:4:39
+  |
+4 | use std::{fs::{read_to_string, write, File}, io::{BufReader, BufWriter, Cursor, Write}, path::Path};
+  |                                       ^^^^        ^^^^^^^^^  ^^^^^^^^^  ^^^^^^  ^^^^^   ^^^^^^^^^^
+
+warning: `risc0tobitvm` (bin "risc0tobitvm") generated 3 warnings (run `cargo fix --bin "risc0tobitvm"` to apply 3 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.90s
+     Running `target/debug/risc0tobitvm`
+res: 0
+groth16 seal: [
+    12,
+    31,
+    125,
+    80,
+    191,
+    232,
+    177,
+    68,
+    150,
+    240,
+    31,
+    192,
+    126,
+    241,
+    133,
+    75,
+    189,
+    189,
+    193,
+    50,
+    26,
+    29,
+    183,
+    17,
+    149,
+    10,
+    153,
+    41,
+    243,
+    192,
+    120,
+    236,
+    11,
+    212,
+    161,
+    157,
+    177,
+    96,
+    41,
+    49,
+    77,
+    49,
+    132,
+    242,
+    253,
+    198,
+    105,
+    227,
+    220,
+    198,
+    251,
+    81,
+    124,
+    226,
+    216,
+    35,
+    0,
+    143,
+    210,
+    0,
+    59,
+    2,
+    74,
+    12,
+    31,
+    190,
+    174,
+    16,
+    228,
+    198,
+    19,
+    211,
+    170,
+    61,
+    113,
+    124,
+    59,
+    203,
+    203,
+    33,
+    132,
+    98,
+    26,
+    46,
+    13,
+    158,
+    96,
+    104,
+    135,
+    64,
+    42,
+    198,
+    186,
+    190,
+    170,
+    100,
+    30,
+    182,
+    153,
+    129,
+    246,
+    185,
+    75,
+    237,
+    126,
+    32,
+    28,
+    108,
+    241,
+    159,
+    156,
+    0,
+    126,
+    163,
+    160,
+    142,
+    150,
+    182,
+    167,
+    117,
+    62,
+    95,
+    112,
+    253,
+    160,
+    189,
+    170,
+    147,
+    35,
+    16,
+    236,
+    211,
+    238,
+    191,
+    209,
+    124,
+    71,
+    82,
+    158,
+    45,
+    87,
+    39,
+    189,
+    235,
+    117,
+    151,
+    90,
+    113,
+    46,
+    207,
+    70,
+    47,
+    77,
+    40,
+    161,
+    66,
+    211,
+    5,
+    78,
+    178,
+    40,
+    160,
+    6,
+    204,
+    38,
+    41,
+    156,
+    224,
+    80,
+    205,
+    125,
+    111,
+    3,
+    35,
+    35,
+    36,
+    35,
+    5,
+    68,
+    118,
+    26,
+    54,
+    175,
+    6,
+    166,
+    81,
+    199,
+    5,
+    219,
+    98,
+    130,
+    176,
+    37,
+    188,
+    61,
+    16,
+    3,
+    167,
+    184,
+    79,
+    34,
+    200,
+    40,
+    74,
+    203,
+    144,
+    180,
+    223,
+    223,
+    201,
+    160,
+    166,
+    208,
+    173,
+    105,
+    218,
+    20,
+    119,
+    198,
+    74,
+    28,
+    119,
+    214,
+    37,
+    17,
+    31,
+    14,
+    115,
+    183,
+    9,
+    202,
+    122,
+    55,
+    16,
+    184,
+    15,
+    144,
+    158,
+    226,
+    227,
+    236,
+    131,
+    60,
+    80,
+    78,
+    246,
+    26,
+    146,
+    162,
+    155,
+    210,
+    115,
+    242,
+    254,
+    215,
+    21,
+]
+groth16 claim: MaybePruned {
+    value: ReceiptClaim {
+        pre: MaybePruned {
+            value: SystemState {
+                pc: 0x00205948,
+                merkle_root: Digest(4964b018809c495194bf069400bad85ccc6c93337758c9bc4d5fc669a1ee7559),
+            },
+            digest: Digest(bbce92a58737a8bae42b54934cfd80c5ba54d26ef95cb8381b85bd213ae9e53a),
+        },
+        post: MaybePruned {
+            value: SystemState {
+                pc: 0x00000000,
+                merkle_root: Digest(0000000000000000000000000000000000000000000000000000000000000000),
+            },
+            digest: Digest(a3acc27117418996340b84e5a90f3ef4c49d22c79e44aad822ec9c313e1eb8e2),
+        },
+        exit_code: Halted(
+            0,
+        ),
+        input: MaybePruned {
+            digest: Digest(0000000000000000000000000000000000000000000000000000000000000000),
+        },
+        output: MaybePruned {
+            value: Some(
+                Output {
+                    journal: MaybePruned {
+                        value: [
+                            0,
+                            0,
+                            0,
+                            0,
+                        ],
+                        digest: Digest(df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119),
+                    },
+                    assumptions: MaybePruned {
+                        value: Assumptions(
+                            [],
+                        ),
+                        digest: Digest(0000000000000000000000000000000000000000000000000000000000000000),
+                    },
+                },
+            ),
+            digest: Digest(aafcff4860161b2f9b6168520935d77414c6caceb0d60e74e1d22b1afe3c7698),
+        },
+    },
+    digest: Digest(f088e187b3e73a18d67ce79e300a6b19d65119b2046382a0242f70d39dbd5190),
+}
+ctx.groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters { control_root: Digest(a516a057c9fbf5629106300934d48e0e775d4230e41e503347cad96fcbde7e2e), bn254_control_id: Digest(51b54a62f2aa599aef768744c95de8c7d89bf716e11b1179f05d6cf0bcfeb60e), verifying_key: VerifyingKey(VerifyingKey { alpha_g1: (20491192805390485299153009773594534940189261866228447918068658471970481763042, 9383485363053290200918347156157836566562967994039712273449902621266178545958), beta_g2: (QuadExtField(6375614351688725206403948262868962793625744043794305715222011528459656738731 + 4252822878758300859123897981450591353533073413197771768651442665752259397132 * u), QuadExtField(10505242626370262277552901082094356697409835680220590971873171140371331206856 + 21847035105528745403288232691147584728191162732299865338377159692350059136679 * u)), gamma_g2: (QuadExtField(10857046999023057135944570762232829481370756359578518086990519993285655852781 + 11559732032986387107991004021392285783925812861821192530917403151452391805634 * u), QuadExtField(8495653923123431417604973247489272438418190587263600148770280649306958101930 + 4082367875863433681332203403145435568316851327593401208105741076214120093531 * u)), delta_g2: (QuadExtField(12043754404802191763554326994664886008979042643626290185762540825416902247219 + 1668323501672964604911431804142266013250380587483576094566949227275849579036 * u), QuadExtField(13740680757317479711909903993315946540841369848973133181051452051592786724563 + 7710631539206257456743780535472368339139328733484942210876916214502466455394 * u)), gamma_abc_g1: [(8446592859352799428420270221449902464741693648963397251242447530457567083492, 1064796367193003797175961162477173481551615790032213185848276823815288302804), (3179835575189816632597428042194253779818690147323192973511715175294048485951, 20895841676865356752879376687052266198216014795822152491318012491767775979074), (5332723250224941161709478398807683311971555792614491788690328996478511465287, 21199491073419440416471372042641226693637837098357067793586556692319371762571), (12457994489566736295787256452575216703923664299075106359829199968023158780583, 19706766271952591897761291684837117091856807401404423804318744964752784280790), (19617808913178163826953378459323299110911217259216006187355745713323154132237, 21663537384585072695701846972542344484111393047775983928357046779215877070466), (6834578911681792552110317589222010969491336870276623105249474534788043166867, 15060583660288623605191393599883223885678013570733629274538391874953353488393)] }) })
+params: Groth16ReceiptVerifierParameters { control_root: Digest(a516a057c9fbf5629106300934d48e0e775d4230e41e503347cad96fcbde7e2e), bn254_control_id: Digest(51b54a62f2aa599aef768744c95de8c7d89bf716e11b1179f05d6cf0bcfeb60e), verifying_key: VerifyingKey(VerifyingKey { alpha_g1: (20491192805390485299153009773594534940189261866228447918068658471970481763042, 9383485363053290200918347156157836566562967994039712273449902621266178545958), beta_g2: (QuadExtField(6375614351688725206403948262868962793625744043794305715222011528459656738731 + 4252822878758300859123897981450591353533073413197771768651442665752259397132 * u), QuadExtField(10505242626370262277552901082094356697409835680220590971873171140371331206856 + 21847035105528745403288232691147584728191162732299865338377159692350059136679 * u)), gamma_g2: (QuadExtField(10857046999023057135944570762232829481370756359578518086990519993285655852781 + 11559732032986387107991004021392285783925812861821192530917403151452391805634 * u), QuadExtField(8495653923123431417604973247489272438418190587263600148770280649306958101930 + 4082367875863433681332203403145435568316851327593401208105741076214120093531 * u)), delta_g2: (QuadExtField(12043754404802191763554326994664886008979042643626290185762540825416902247219 + 1668323501672964604911431804142266013250380587483576094566949227275849579036 * u), QuadExtField(13740680757317479711909903993315946540841369848973133181051452051592786724563 + 7710631539206257456743780535472368339139328733484942210876916214502466455394 * u)), gamma_abc_g1: [(8446592859352799428420270221449902464741693648963397251242447530457567083492, 1064796367193003797175961162477173481551615790032213185848276823815288302804), (3179835575189816632597428042194253779818690147323192973511715175294048485951, 20895841676865356752879376687052266198216014795822152491318012491767775979074), (5332723250224941161709478398807683311971555792614491788690328996478511465287, 21199491073419440416471372042641226693637837098357067793586556692319371762571), (12457994489566736295787256452575216703923664299075106359829199968023158780583, 19706766271952591897761291684837117091856807401404423804318744964752784280790), (19617808913178163826953378459323299110911217259216006187355745713323154132237, 21663537384585072695701846972542344484111393047775983928357046779215877070466), (6834578911681792552110317589222010969491336870276623105249474534788043166867, 15060583660288623605191393599883223885678013570733629274538391874953353488393)] }) }
+a0: Fr(BigInt([7130882427188156069, 1049009083181434513, 0, 0]))
+a1: Fr(BigInt([3697489259482209655, 3350360138146499143, 0, 0]))
+self.claim.digest: Digest(f088e187b3e73a18d67ce79e300a6b19d65119b2046382a0242f70d39dbd5190)
+c0: Fr(BigInt([1745962563824355568, 1831568877396917462, 0, 0]))
+c1: Fr(BigInt([11565915664859877846, 10399301500130045732, 0, 0]))
+id_bn254_fr: Fr(BigInt([11122108712776021329, 14404866527164069615, 8723784606760279000, 1060314849733271024]))
+res: Ok(
+    (),
+)
+claim_digest: [
+    240,
+    136,
+    225,
+    135,
+    179,
+    231,
+    58,
+    24,
+    214,
+    124,
+    231,
+    158,
+    48,
+    10,
+    107,
+    25,
+    214,
+    81,
+    25,
+    178,
+    4,
+    99,
+    130,
+    160,
+    36,
+    47,
+    112,
+    211,
+    157,
+    189,
+    81,
+    144,
+]

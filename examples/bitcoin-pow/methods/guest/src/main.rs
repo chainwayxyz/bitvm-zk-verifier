@@ -115,6 +115,9 @@ fn main() {
         );
     }
     // Outputs:
-    env::commit(&curr_prev_block_hash);
-    env::commit(&total_work.to_be_bytes());
+    // env::commit(&curr_prev_block_hash);
+    // env::commit(&total_work.to_be_bytes());
+    // env::commit(&1u32);
+    // env::commit(&2u32);
+    env::commit(&0u32);
 }

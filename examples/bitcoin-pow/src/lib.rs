@@ -19,7 +19,7 @@ const HEADERS_HEX: [&str; 11] = [
     "01000000e915d9a478e3adf3186c07c61a22228b10fd87df343c92782ecc052c000000006e06373c80de397406dc3d19c90d71d230058d28293614ea58d6a57f8f5d32f8b8ce6649ffff001d173807f8"
 ];
 
-pub fn calculate_pow() -> (Receipt, ([u8; 32], [u8; 32])) {
+pub fn calculate_pow() -> (Receipt, u32) {
     let mut env = ExecutorEnv::builder();
 
     let headers: Vec<Header> = HEADERS_HEX
@@ -51,21 +51,28 @@ pub fn calculate_pow() -> (Receipt, ([u8; 32], [u8; 32])) {
     let receipt = prover.prove(env, CALCULATE_POW_ELF).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let (last_block_hash, pow): ([u8; 32], [u8; 32]) = receipt.journal.decode().expect(
+    // let (last_block_hash, pow): ([u8; 32], [u8; 32]) = receipt.receipt.journal.decode().expect(
+    //     "Journal output should deserialize into the same types (& order) that it was written",
+    // );
+    let res: u32 = receipt.receipt.journal.decode().expect(
         "Journal output should deserialize into the same types (& order) that it was written",
     );
+    println!("res: {:?}", res);
 
-    let last_block_header_str: &str = "01000000e915d9a478e3adf3186c07c61a22228b10fd87df343c92782ecc052c000000006e06373c80de397406dc3d19c90d71d230058d28293614ea58d6a57f8f5d32f8b8ce6649ffff001d173807f8";
-    let last_block_header: Header =
-        deserialize(&hex::decode(last_block_header_str).unwrap()).unwrap();
-    // println!("{:?}", last_block_header.block_hash().to_byte_array());
-    assert_eq!(
-        last_block_header.block_hash().to_byte_array(),
-        last_block_hash
-    );
+    // let last_block_header_str: &str = "01000000e915d9a478e3adf3186c07c61a22228b10fd87df343c92782ecc052c000000006e06373c80de397406dc3d19c90d71d230058d28293614ea58d6a57f8f5d32f8b8ce6649ffff001d173807f8";
+    // // let last_block_header_str: &str = "010000000508085c47cc849eb80ea905cc7800a3be674ffc57263cf210c59d8d00000000112ba175a1e04b14ba9e7ea5f76ab640affeef5ec98173ac9799a852fa39add320cd6649ffff001d1e2de565";
+    // let last_block_header: Header =
+    //     deserialize(&hex::decode(last_block_header_str).unwrap()).unwrap();
+    // // println!("{:?}", last_block_header.block_hash().to_byte_array());
+    // assert_eq!(
+    //     last_block_header.block_hash().to_byte_array(),
+    //     last_block_hash
+    // );
 
-    // Report the product
-    println!("PoW up until block: {:?} is {:?}", last_block_hash, pow);
-    (receipt, (last_block_hash, pow))
+    // // Report the product
+    // println!("PoW up until block: {:?} is {:?}", last_block_hash, pow);
+    // println!("Journal bytes: {:?}", receipt.receipt.journal.bytes);
+    // (receipt.receipt, (last_block_hash, pow))
+    (receipt.receipt, res)
 }
 

@@ -40,14 +40,12 @@ pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
     let receipt = prover.prove(env, MULTIPLY_ELF).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let c: u64 = receipt.journal.decode().expect(
-        "Journal output should deserialize into the same types (& order) that it was written",
-    );
+    let c: u64 = receipt.stats.total_cycles;
 
     // Report the product
     println!("I know the factors of {}, and I can prove it!", c);
 
-    (receipt, c)
+    (receipt.receipt, c)
 }
 
 #[cfg(test)]
