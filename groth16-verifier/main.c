@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Sha256 implementaion from https://github.com/B-Con/crypto-algorithms/blob/master/sha256.c
+// Sha256 implementation from https://github.com/B-Con/crypto-algorithms/blob/master/sha256.c
 #include "sha256.h"
 #include "constants.h"
 
