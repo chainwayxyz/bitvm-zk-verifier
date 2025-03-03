@@ -242,7 +242,7 @@ fn execute_instruction(s: &mut Snapshot) {
             println!("syscall called");
             s.pc += 1
         }
-        _ => panic!("Unknown instuction type {}", s.instruction.asm_type),
+        _ => panic!("Unknown instruction type {}", s.instruction.asm_type),
     }
 }
 
